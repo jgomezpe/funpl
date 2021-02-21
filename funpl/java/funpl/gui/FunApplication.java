@@ -1,20 +1,24 @@
 package funpl.gui;
 
 import java.io.IOException;
+import java.util.HashMap;
 
 import funpl.FunAPI;
-import nsgl.app.Component;
-import nsgl.character.CharacterSequence;
-import nsgl.generic.Configurable;
-import nsgl.generic.Named;
-import nsgl.generic.hashmap.HashMap;
-import nsgl.gui.Console;
-import nsgl.gui.Render;
-import nsgl.json.JSON;
-import nsgl.string.I18N;
-import nsgl.gui.Editor;
+import funpl.util.FunConstants;
+import jxon.Configurable;
+import jxon.JXON;
+import speco.object.Named;
+import lifya.Position;
+import lifya.Token;
+import lifya.lexeme.Symbol;
+import utila.I18N;
+import aplikigo.Application;
+import aplikigo.Component;
+import aplikigo.gui.Console;
+import aplikigo.gui.Render;
+import aplikigo.gui.Editor;
 
-public class Application implements nsgl.app.Application, Configurable{
+public class FunApplication implements Application, Configurable{
     public String PROGRAM = "program";
     public String COMMAND = "command";
     public String RENDER = "render";
@@ -23,31 +27,67 @@ public class Application implements nsgl.app.Application, Configurable{
     protected String id = "funpl";
     protected FunAPI api;
     
-    public Application() {}
+    public FunApplication() {}
 
-    public Application(String id, Editor program, Editor command, Console console, Render render, FunAPI api){ 
+    public FunApplication(String id, Editor program, Editor command, Console console, Render render, FunAPI api){ 
 	this.id = id;
 	this.api = api;
 	if( program instanceof Named ) PROGRAM = ((Named)program).id();
-	component.set(PROGRAM, program);
+	component.put(PROGRAM, program);
 	if( command instanceof Named ) COMMAND = ((Named)command).id();
-	component.set(COMMAND, command);
+	component.put(COMMAND, command);
 	if( render instanceof Named ) RENDER = ((Named)render).id();
-	component.set(RENDER, render);
+	component.put(RENDER, render);
 	if( console instanceof Named ) CONSOLE = ((Named)console).id();
-	component.set(CONSOLE, console);	
+	component.put(CONSOLE, console);	
     }
   
     public String i18n(String code){ return I18N.process(code); }
  
+    public void error(String msg) {
+	try {
+	    JXON json = JXON.parse(msg);
+	    int pos = json.integer(Position.START);
+	    int end = json.valid(Token.END)?json.integer(Token.END):pos+1;
+	    int row = json.integer(Position.ROW);
+	    int col = json.integer(Position.COLUMN);
+	    String value = json.string(Token.VALUE);
+	    Editor e = (Editor)get(json.string(Position.INPUT)); 
+	    e.highlight(row);
+	    e.locate(row,col);
+	    String c = e.getText().substring(pos,end);
+	    StringBuilder sb = new StringBuilder();
+	    switch(value) {
+	    case FunConstants.VALUE:
+	    case FunConstants.FUNCTION:
+	    case FunConstants.VARIABLE:
+	    case FunConstants.PRIMITIVE:
+		    sb.append("·Unexpected "+value+"· "+c);
+		    break;
+	    case Symbol.TAG:
+	    case Token.ERROR:
+		    sb.append("·Unexpected character· "+c);
+		    break;
+	    default:
+		   sb.append(value);  
+	    }
+	    sb.append(" [·row· ");
+	    sb.append(row+1);
+	    sb.append(", ·column· ");
+	    sb.append(col+1);
+	    sb.append(']');
+	    ((Console)get(CONSOLE)).error(i18n(sb.toString()));	   
+	} catch (IOException e1) { }
+    }
+    
     public void compile() { compile(program().getText()); }
     
     public void compile( String code ) {
 	try {
-	    api.compile(new CharacterSequence(code,PROGRAM));
+	    api.compile(code, PROGRAM);
 	    ((Console)get(CONSOLE)).out(i18n("·No errors·"));
 	} catch (IOException e) {
-	    ((Console)get(CONSOLE)).error(i18n(e.getMessage()));
+	    error(e.getMessage());
 	}
     }
 
@@ -55,12 +95,12 @@ public class Application implements nsgl.app.Application, Configurable{
     
     public Object execute( String command ) {
 	try {
-	    Object obj = api.run(new CharacterSequence(command,COMMAND));
+	    Object obj = api.run(command, COMMAND);
 	    ((Console)get(CONSOLE)).out(i18n("·No errors·"));
 	    render().render(obj);
 	    return obj;
 	} catch (Exception e) {
-	    ((Console)get(CONSOLE)).error(i18n(e.getMessage()));
+	    error(e.getMessage());
 	    return null;
 	}
     }
@@ -69,7 +109,7 @@ public class Application implements nsgl.app.Application, Configurable{
     
     public Object apply( String command ) {
 	try {
-	    Object obj = api.apply(new CharacterSequence(command,COMMAND));
+	    Object obj = api.apply(command, COMMAND);
 	    ((Console)get(CONSOLE)).out(i18n("·No errors·"));
 	    render().render(obj);
 	    return obj;
@@ -97,26 +137,26 @@ public class Application implements nsgl.app.Application, Configurable{
     public String id() { return id; }
 
     @Override
-    public void config(JSON json) {
+    public void config(JXON json) {
 	if( json.string("id")!=null ) id = json.string("id");
 	String tag = json.string("program");
 	if( tag!=null ) {
-	    component.set(tag, program());
+	    component.put(tag, program());
 	    PROGRAM = tag;
 	}
 	tag = json.string("command");
 	if( tag!=null ) {
-	    component.set(tag, command());
+	    component.put(tag, command());
 	    COMMAND = tag;
 	}
 	tag = json.string("console");
 	if( tag!=null ) {
-	    component.set(tag, console());
+	    component.put(tag, console());
 	    CONSOLE = tag;
 	}
 	tag = json.string("render");
 	if( tag!=null ) {
-	    component.set(tag, render());
+	    component.put(tag, render());
 	    RENDER = tag;
 	}
 	api.config(json.object("api"));
@@ -129,7 +169,7 @@ public class Application implements nsgl.app.Application, Configurable{
     }
 
     @Override
-    public boolean authorized(JSON user, String object, String method) {
+    public boolean authorized(JXON user, String object, String method) {
 	// TODO Auto-generated method stub
 	return false;
     }

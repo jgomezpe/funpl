@@ -1,7 +1,7 @@
 package funpl;
 
-import nsgl.json.JSON;
+import jxon.JXON;
 
 public interface FunAPILoader {
-    FunAPI load( JSON json );
+    FunAPI load( JXON json );
 }

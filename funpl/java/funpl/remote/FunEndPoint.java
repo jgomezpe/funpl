@@ -1,14 +1,15 @@
 package funpl.remote;
 
+import aplikigo.web.EndPoint;
 import funpl.FunAPI;
 
-public class EndPoint extends nsgl.app.web.EndPoint{
+public class FunEndPoint extends EndPoint{
     /**
      * 
      */
     private static final long serialVersionUID = 3184723192570333996L;
 
-    public EndPoint( String id, FunAPI api ) {
-	server =  new Application(id, api, this);
+    public FunEndPoint( String id, FunAPI api ) {
+	server =  new FunRemoteApplication(id, api, this);
     }
 }

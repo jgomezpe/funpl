@@ -1,17 +1,29 @@
 package funpl.lexer;
 
-import java.io.IOException;
-
 import funpl.util.FunConstants;
-import nsgl.character.CharacterSequence;
-import nsgl.parse.Regex;
+import lifya.lexeme.Lexeme;
+import lifya.Source;
+import lifya.Token;
 
-public class CommentLexeme extends Regex{
-	public CommentLexeme(){ super("%.*", FunConstants.COMMENT); }
-	
+public class Comment implements Lexeme<String>{
 	@Override
-	public Object instance(CharacterSequence input, String matched) throws IOException {
-	    if(matched.charAt(0)!='%') throw input.exception("·Invalid "+type()+"· ", 0);
-	    return matched.substring(1);
+	public Token match(Source txt, int start, int end) {
+	    if(!startsWith(txt.get(start))) return error(txt, start, start+1);
+	    int n = end;
+	    end = start;
+	    while(end<n && followsWith(txt.get(end))) end++;
+	    return new Token(type(),txt,start,end,txt.substring(start,end));
 	}
+
+	@Override
+	public boolean startsWith(char c){ 
+	    return c=='%';
+	}
+
+	public boolean followsWith(char c){ 
+	    return c!='\n' && c!='\r';
+	}
+
+	@Override
+	public String type() { return FunConstants.COMMENT; }	
 }

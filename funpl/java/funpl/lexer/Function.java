@@ -1,25 +1,36 @@
 package funpl.lexer;
 
-import java.io.IOException;
-
 import funpl.util.FunConstants;
-import nsgl.character.CharacterSequence;
-import nsgl.parse.Regex;
+import lifya.lexeme.Lexeme;
+import lifya.Source;
+import lifya.Token;
 
-public class FunctionLexeme extends Regex{
+public class Function implements Lexeme<String>{
     protected boolean withNumber;
-	public FunctionLexeme(){ this(true); }
+	public Function(){ this(true); }
 	
-	public FunctionLexeme(boolean canStartWithNumber ){ 
-		super( canStartWithNumber?"[a-z0-9][a-zA-Z0-9_]*":"[a-z][a-zA-Z0-9_]*", FunConstants.FUNCTION); 
+	public Function(boolean canStartWithNumber ){ 
 		this.withNumber = canStartWithNumber;
 	}
 
 	@Override
-	public Object instance(CharacterSequence input, String matched) throws IOException {
-	    char c = matched.charAt(0);
-	    if( !Character.isLowerCase(c) && !(withNumber && Character.isDigit(c)) )
-		throw input.exception("·Invalid "+type()+"· ", 0);
-	    return matched; 
-	}	
+	public Token match(Source txt, int start, int end) {
+	    if(!startsWith(txt.get(start))) return error(txt, start, start+1);
+	    int n = end;
+	    end = start+1;
+	    while(end<n && followsWith(txt.get(end))) end++;
+	    return token(txt,start,end,txt.substring(start,end));
+	}
+	
+	@Override
+	public boolean startsWith(char c){ 
+	    return Character.isLowerCase(c) || (withNumber && Character.isDigit(c)) ;
+	}
+
+	public boolean followsWith(char c){ 
+	    return Character.isAlphabetic(c) || c=='_';
+	}
+
+	@Override
+	public String type() { return FunConstants.FUNCTION; }   	
 }

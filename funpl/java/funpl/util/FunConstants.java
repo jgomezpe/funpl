@@ -30,6 +30,7 @@ public class FunConstants {
 	public static final String DEFINITION="definition";
 	public static final String DEF_LIST="list";
 	public static final String COMMAND="command";
+	public static final String ARGS="args";
 	
 	public static final String expected="·Expecting· ";
 	public static final String unexpected="·Unexpected· ";
