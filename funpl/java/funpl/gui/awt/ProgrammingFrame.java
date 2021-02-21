@@ -6,12 +6,12 @@ import java.awt.event.*;
 import javax.swing.*;
 
 import funpl.FunAPI;
-import nsgl.gui.Render;
-import nsgl.gui.TitleComponent;
-import nsgl.stream.Resource;
-import nsgl.stream.loader.FromClassLoader;
-import nsgl.stream.loader.FromOS;
-import nsgl.string.I18N;
+import aplikigo.gui.Render;
+import aplikigo.gui.TitleComponent;
+import aplikigo.stream.Resource;
+import aplikigo.stream.loader.FromClassLoader;
+import aplikigo.stream.loader.FromOS;
+import utila.I18N;
 
 /**
 *

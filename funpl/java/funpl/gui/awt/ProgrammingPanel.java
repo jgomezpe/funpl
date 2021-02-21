@@ -9,6 +9,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashMap;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -28,23 +29,20 @@ import org.fife.ui.rsyntaxtextarea.Token;
 import funpl.gui.GUIFunConstants;
 import funpl.lexer.FunLexer;
 import funpl.FunAPI;
-import funpl.gui.Application;
+import funpl.gui.FunApplication;
 import funpl.util.FunConstants;
-import nsgl.generic.hashmap.HashMap;
-import nsgl.generic.keymap.KeyMap;
-import nsgl.gui.Render;
-import nsgl.gui.TitleComponent;
-import nsgl.gui.awt.Console;
-import nsgl.gui.awt.FileFilter;
-import nsgl.gui.awt.JFontChooser;
-import nsgl.gui.awt.LogPanel;
-import nsgl.gui.awt.rsyntax.Editor;
-import nsgl.json.JSON;
-import nsgl.language.lexeme.Space;
-import nsgl.language.lexeme.Symbol;
-import nsgl.stream.Resource;
-import nsgl.string.I18N;
-
+import jxon.JXON;
+import lifya.lexeme.Space;
+import lifya.lexeme.Symbol;
+import utila.I18N;
+import aplikigo.gui.Render;
+import aplikigo.gui.TitleComponent;
+import aplikigo.gui.awt.Console;
+import aplikigo.gui.awt.FileFilter;
+import aplikigo.gui.awt.JFontChooser;
+import aplikigo.gui.awt.LogPanel;
+import aplikigo.gui.awt.rsyntax.Editor;
+import aplikigo.stream.Resource;
 
 public class ProgrammingPanel  extends JPanel{
 	/**
@@ -112,8 +110,8 @@ public class ProgrammingPanel  extends JPanel{
 	
 	//
 	FunAPI api;
-	Application app;
-	protected KeyMap<Integer, ?> tokens;
+	FunApplication app;
+	protected HashMap<Integer, ?> tokens;
 	
 	public LogPanel getLogPanel(){ return logPanel; }
 
@@ -130,15 +128,16 @@ public class ProgrammingPanel  extends JPanel{
 	
 	public static String i18n(String code){ return I18N.process(code); }
 	
-	public static KeyMap<String, Integer> rSyntaxEditorTokens(){
-		KeyMap<String, Integer> converter = new HashMap<String, Integer>();
-		converter.set(FunConstants.VALUE,Token.LITERAL_NUMBER_DECIMAL_INT);
-		converter.set(FunConstants.COMMENT,Token.COMMENT_EOL);
-		converter.set(FunConstants.VARIABLE, Token.VARIABLE);
-		converter.set(Space.TAG, Token.WHITESPACE);
-		converter.set(FunConstants.FUNCTION, Token.IDENTIFIER);
-		converter.set(Symbol.TAG,Token.SEPARATOR);
-		converter.set(FunConstants.PRIMITIVE, Token.OPERATOR);
+	public static HashMap<String, Integer> rSyntaxEditorTokens(){
+		HashMap<String, Integer> converter = new HashMap<String, Integer>();
+		converter.put(FunConstants.VALUE,Token.LITERAL_NUMBER_DECIMAL_INT);
+		converter.put(FunConstants.COMMENT,Token.COMMENT_EOL);
+		converter.put(FunConstants.VARIABLE, Token.VARIABLE);
+		converter.put(Space.TAG, Token.WHITESPACE);
+		converter.put(FunConstants.FUNCTION, Token.IDENTIFIER);
+		converter.put(Symbol.TAG,Token.SEPARATOR);
+		converter.put(FunConstants.PRIMITIVE, Token.OPERATOR);
+		converter.put(lifya.Token.ERROR, Token.ERROR_CHAR);
 		return converter;
 	}
 	
@@ -146,10 +145,10 @@ public class ProgrammingPanel  extends JPanel{
 	    try {
 		String api_code = readFile(file);
 		if(api_code!=null) {
-		    	JSON json = new JSON(api_code);
+		    	JXON json = JXON.parse(api_code);
 			api.config(json.object(GUIFunConstants.FUN));
 			render.config(json.object(Render.TAG));
-			KeyMap<String, Integer> map = rSyntaxEditorTokens();
+			HashMap<String, Integer> map = rSyntaxEditorTokens();
 			FunLexer lexer = api.lexer();
 			programEditor.setLexer(lexer, map);
 			commandEditor.setLexer(lexer, map);	
@@ -212,7 +211,7 @@ public class ProgrammingPanel  extends JPanel{
 			initButton(styleBtn, "style.png");
 			styleBtn.addActionListener(new ProgrammingPanel_styleBtn_actionAdapter(this));
 			initButton(langBtn, "language.png");
-			langBtn.addActionListener(new ProgrammingPanel_langBtn_actionAdapter(this));
+			langBtn.addActionListener(new LangAdapter(this));
 			toolBar.add(newBtn);
 			toolBar.add(openBtn);
 			toolBar.add(saveBtn);
@@ -280,7 +279,7 @@ public class ProgrammingPanel  extends JPanel{
 			this.setAPI(api);
 			
 			this.setLanguage();
-			this.app = new Application("funpl", programEditor, commandEditor, log, render, this.api);
+			this.app = new FunApplication("funpl", programEditor, commandEditor, log, render, this.api);
 		}catch(Exception e){ e.printStackTrace();  }
 	}
 	
@@ -395,7 +394,7 @@ public class ProgrammingPanel  extends JPanel{
 
 	public void applyBtn_actionPerformed(ActionEvent actionEvent){ app.apply(); }
 	
-	public void langBtn_actionPerformed(ActionEvent actionEvent){ 
+	public void language(ActionEvent actionEvent){ 
 		String file = chooseFile( GUIFunConstants.FML, i18n );
 		if( file != null ){
 			try {
@@ -487,10 +486,10 @@ class ProgrammingPanel_styleBtn_actionAdapter implements ActionListener{
 	public void actionPerformed(ActionEvent actionEvent){ adaptee.styleBtn_actionPerformed(actionEvent); }	
 }
 
-class ProgrammingPanel_langBtn_actionAdapter implements ActionListener{
+class LangAdapter implements ActionListener{
 	private ProgrammingPanel adaptee;
 	
-	ProgrammingPanel_langBtn_actionAdapter(ProgrammingPanel adaptee){ this.adaptee = adaptee; }
+	LangAdapter(ProgrammingPanel adaptee){ this.adaptee = adaptee; }
 
-	public void actionPerformed(ActionEvent actionEvent){ adaptee.langBtn_actionPerformed(actionEvent); }	
+	public void actionPerformed(ActionEvent actionEvent){ adaptee.language(actionEvent); }	
 }

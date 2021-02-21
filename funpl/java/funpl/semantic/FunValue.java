@@ -1,16 +1,18 @@
 package funpl.semantic;
 
+import java.util.HashMap;
+
 import funpl.util.FunConstants;
-import nsgl.generic.keymap.KeyMap;
+import lifya.Source;
 
 public class FunValue extends FunCommandCall{
 	protected Object obj = null;
 	protected Exception e = null;
-	public FunValue(int pos, String src, FunMachine machine, String name) {
-		super(pos, src, machine, name);
+	public FunValue(Source input, int pos, FunMachine machine, String name) {
+		super(input, pos, machine, name);
 		try{ obj = machine.value.get(name); }catch(Exception e){this.e = exception(FunConstants.novalue + name);}
 	}
-	public Object execute( KeyMap<String,Object> variables ) throws Exception{
+	public Object execute( HashMap<String,Object> variables ) throws Exception{
 		if( e != null ) throw e;
 		return obj;
 	}

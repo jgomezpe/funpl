@@ -1,45 +1,43 @@
 package funpl.semantic;
 
 import java.io.IOException;
+import java.util.HashMap;
 
 import funpl.util.FunConstants;
-import nsgl.generic.hashmap.HashMap;
-import nsgl.generic.array.Vector;
+import speco.array.Array;
 
 public class FunProgram extends FunCommand{
 	public static String MAIN="main";
 	
-	public FunProgram(FunMachine machine){ super(0,"program",machine); }
-
-	public FunProgram(FunMachine machine, Vector<FunCommandDef> commands) throws IOException{
-		this(machine);
+	public FunProgram(FunMachine machine, Array<FunCommandDef> commands){
+		super(commands.get(0).input(), commands.get(0).start(), machine);
 		add(commands);
 	}
 
-	protected HashMap<String, Vector<FunCommandDef>> commands = new HashMap<String,Vector<FunCommandDef>>();
+	protected HashMap<String, Array<FunCommandDef>> commands = new HashMap<String,Array<FunCommandDef>>();
 	
 	public void add(FunCommandDef def){
 		String name = def.name();
-		Vector<FunCommandDef> vdef = commands.get(name);
+		Array<FunCommandDef> vdef = commands.get(name);
 		if( vdef == null ){
-			vdef = new Vector<FunCommandDef>();
-			commands.set(name, vdef);
+			vdef = new Array<FunCommandDef>();
+			commands.put(name, vdef);
 		}
 		vdef.add(def);
 	}
 
-	public void add(Vector<FunCommandDef> def) throws IOException{ 
+	public void add(Array<FunCommandDef> def){ 
 		for( FunCommandDef d:def ) add(d);
 	}
 	
 	public void clear(){ commands.clear(); }
 	
-	public boolean defined(String command){	return commands.valid(command);	} 
+	public boolean defined(String command){	return commands.containsKey(command);	} 
 	
-	protected Vector<FunCommandDef> candidates(String command, int arity ){
-		Vector<FunCommandDef> candidates = new Vector<FunCommandDef>();
+	protected Array<FunCommandDef> candidates(String command, int arity ){
+		Array<FunCommandDef> candidates = new Array<FunCommandDef>();
 		try{
-			Vector<FunCommandDef> v = commands.get(command);
+			Array<FunCommandDef> v = commands.get(command);
 			for( FunCommandDef c:v ) if( c.arity()==arity ) candidates.add(c);
 		}catch(Exception e){}
 		return candidates;
@@ -50,7 +48,7 @@ public class FunProgram extends FunCommand{
 	
 	public Object execute( String command, Object... values ) throws Exception{
 		if( !defined(command) ) throw exception(FunConstants.nocommand + command);
-		Vector<FunCommandDef> candidates = candidates(command,values.length );
+		Array<FunCommandDef> candidates = candidates(command,values.length );
 		if(candidates.size()==0) throw exception(FunConstants.argnumbermismatch + command);
 		Exception e=null;
 //		LanguageMultiException e=null;
@@ -58,8 +56,8 @@ public class FunProgram extends FunCommand{
 		while( i<candidates.size() ){
 			FunCommandDef cand = candidates.get(i);
 			try{ 
-				cand.match(values);
-				i++;
+			    cand.match(values);
+			    i++;
 			}catch(Exception ex){
 /*					if( e!=null ){
 						e.add(ex);
@@ -91,7 +89,7 @@ public class FunProgram extends FunCommand{
 	
 	public String toString(){
 		StringBuilder sb=new StringBuilder();
-		for( Vector<FunCommandDef> d:this.commands )
+		for( Array<FunCommandDef> d:this.commands.values() )
 			for( FunCommandDef c:d ) sb.append(c+"\n");		
 		return sb.toString();
 	}	
