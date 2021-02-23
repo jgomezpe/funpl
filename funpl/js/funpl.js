@@ -136,6 +136,12 @@ function l2h(one,two){ return (one-two) }
  */
 function h2l(one,two){ return (two-one) }
 
+Compare = {
+    equals(one, two){
+        if(one.equals !== undefined) return one.equals(two)
+        else return one==two
+    }    
+}
 
 /**
  * <p>Searching algorithm for sorted arrays of objects</p>
@@ -1380,19 +1386,35 @@ class FunCommand extends FunObject{
 }
 
 class FunCommandCall extends FunCommand {
-    constructor( input, pos, machine, name, args=[] ){
+    constructor(input, pos, machine, name, args=[]){
         super(input, pos, machine)
         this.name = name
         this.ho_name = name
         this.args = args
         this.arity = this.args.length
     }
+
+    var2assign(variables) {
+        var undvars = {}
+        var vars = this.getVars()
+        for( var v in vars ) {
+            var o = variables[v]
+            if(o===undefined || o==FunVariable.UNASSIGNED) undvars[v] = FunVariable.UNASSIGNED
+        }
+        return undvars
+    }
+    
+    size(variables){
+        var i=0
+        for( var v in variables ) i++
+        return i
+    }
     
     match(values, variables={}){
-        this.ho_name = variables[name] || this.name
+        this.ho_name = variables[this.name] || this.name
         if( this.arity == 0 ){
             var obj=this.machine.execute(this, this.ho_name)
-            if(obj==null || values.length!=1 || obj!=values[1]) 
+            if(obj==null || values.length!=1 || !Compare.equals(obj,values[1])) 
                 throw this.exception(FunConstants.argmismatch + values[1])
             return variables
         }
@@ -1401,49 +1423,62 @@ class FunCommandCall extends FunCommand {
         var ex = null
         var index = []
         for( var i=0; i<this.arity; i++ ) index.push(i)
-        var m = 0
-        while( index.length>0 && index.length!=m) { 
-            m = index.length
-            var i=0 
-            while( i<index.length ){
-                var k
-                try{ k = index[i] }catch(e){ k=1 }
+        var k
+        // Checking FunValues and Variables
+        var i=0
+        while(i<index.length) {
+            k=index[i]
+            if( this.args[k] instanceof FunValue || this.args[k] instanceof FunVariable ){
+                this.args[k].match([values[k]],variables)
+                index.splice(i,1)
+            }else i++
+        }
+        // Checking other commands  
+        var m = 1
+        i=0
+        while(index.length>0 && m<3) {
+            k = index[i]
+            if(this.size(this.args[k].var2assign(variables)) <= m) {
                 var aname = this.args[k].name
-                if( this.args[k] instanceof FunVariable ){
-                    this.args[k].match([values[k]], variables)
-                    index.splice(i,1)
-                }else if( this.args[k] instanceof FunValue ){
-                    var obj = this.args[k].run(variables)
-                    if( obj==null || obj != values[k] ) 
-                        throw this.exception(FunConstants.argmismatch + values[k])
-                    index.splice(i,1)
-                }else{                  
-                    try{
-                        var c = this.machine.primitive[aname]
-                        if(c != null ){
-                            var a = c.arity
-                            var toMatch = []
-                            for( var j=0; j<a; j++ )
-                                try{ toMatch.push(this.args[k].args[j].run(variables)) }
-                                catch(x){ toMatch.push(null) }
-                            c.input = this.args[k].input
-                            c.start = this.args[k].start
-                            var objs = c.reverse(values[k], toMatch)
-                            this.args[k].match(objs, variables)
-                        }else{
-                            var obj = this.args[k].run(variables)
-                            if( obj==null || obj != values[k] ) 
-                                throw this.args[k].exception(FunConstants.argmismatch + values[k])
-                        }
-                        index.splice(i,1)
-                    }catch(e){
-                        ex = e
-                        i++
+                try{
+                    var c = this.machine.primitive[aname]
+                    if(c !== undefined ){
+                        var a = c.arity
+                        var toMatch = []
+                        for( var j=0; j<a; j++ )
+                            try{ 
+                                toMatch.push(this.args[k].args[j].run(variables))
+                            }catch(x){ toMatch.push(null) }
+                        c.input = this.args[k].input
+                        c.start = this.args[k].start
+                        var objs = c.reverse(values[k], toMatch)
+                        this.args[k].match(objs, variables)
+                    }else{
+                        var obj = this.args[k].run(variables)
+                        if( obj==null || !Compare.equals(obj,values[k]) ) 
+                            throw this.args[k].exception(FunConstants.argmismatch + values[k])
                     }
+                    index.splice(i,1)
+                    i=-1 
+                    m=1
+                }catch(e){
+                    ex = e
                 }
             }
-        }   
-        if( index.length > 0 ) throw ex
+            i++
+            if(i==index.length) {
+                m++
+                i=0
+            }
+        }
+    
+        if( index.length > 0 ) {
+            var sb = ""
+            var uvars = this.var2assign(variables)
+            for(var uv in uvars) sb += " "+uv
+            ex = ex!=null?ex:this.exception(FunConstants.novar + sb)
+            throw ex
+        }
         return variables 
     }
    
@@ -1526,9 +1561,19 @@ class FunValue extends FunCommandCall{
         if( this.e != null ) throw this.e
         return this.obj
     }
+    
+    match( values, variables={} ) {
+        if( values.length!=1 )  throw this.exception(FunConstants.argnumbermismatch + 1 + "!=" + values.length)
+        var value = values[0]
+         if( this.obj===null || !Compare.equals(this.obj,value) ) throw this.exception(FunConstants.argmismatch + value)
+        return variables
+    }
+    
 }
 
 class FunVariable extends FunCommandCall{
+    static UNASSIGNED = "%unassigned"
+    
     constructor(input, pos, machine, name) { super(input, pos, machine, name) }
     
     run( variables ){
@@ -1537,21 +1582,20 @@ class FunVariable extends FunCommandCall{
         return v
     }   
 
-    getVars(vars) { vars.set(name,name) }
+    getVars(vars) { vars[this.name] = FunVariable.UNASSIGNED }
     
     match(values, variables={}){
         if( values.length!=1 )  
             throw this.exception(FunConstants.argnumbermismatch + 1 + "!=" + values.length)
-        var n=this.name
+        var value = values[0]
         var match = true
-        var obj = variables[n]
-        if(obj!=null)
-            match = obj==values[0]
+        var obj = variables[this.name]
+        if(obj!=null) match = Compare.equals(obj,value)
         else{ 
-            match = this.machine.can_assign(n, values[0])
-            if(match) variables[n] = values[0]
+            match = this.machine.can_assign(this.name, value)
+            if(match) variables[this.name] = value
         }       
-        if( !match ) throw this.exception(FunConstants.argmismatch + values[0])
+        if( !match ) throw this.exception(FunConstants.argmismatch + value)
         return variables
     }
 }

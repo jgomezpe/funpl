@@ -24,8 +24,19 @@ public class FunCommandCall extends FunCommand {
 
     public String name(){ return name; }
     public FunCommandCall[] args(){ return args; }
-	
-    public HashMap<String, Object> match( HashMap<String, Object> variables, Object... values ) throws Exception{
+
+    public HashMap<String,Object> var2assign(HashMap<String,Object> variables) {
+	HashMap<String,Object> undvars = new HashMap<String, Object>();
+	HashMap<String,Object> vars = getVars();
+	for( String v:vars.keySet() ) {
+	    Object o = variables.get(v);
+	    if(o==null || o.equals(FunVariable.UNASSIGNED)) undvars.put(v, FunVariable.UNASSIGNED);
+	}
+	return undvars;
+    }
+    
+    protected HashMap<String, Object> match( HashMap<String, Object> variables, Object... values )
+	    throws Exception{
 	ho_name = (String)variables.get(name); 
 
 	if( ho_name == null ) ho_name = name;
@@ -40,55 +51,63 @@ public class FunCommandCall extends FunCommand {
 	Exception ex = null;
 	Array<Integer> index = new Array<Integer>();
 	for( int i=0; i<arity; i++ ) index.add(i);
-//		int n = 0;
-	int m = 0;
-	while( index.size()>0 && (index.size()!=m)) { // || n!=variables.size())){
-	    m = index.size();
-//				n = variables.size();
-	    int i=0; 
-	    while( i<index.size() ){
-		int k;
-		try{ k = index.get(i); }catch(Exception e){k=1;}
-		String aname = args[k].name();
-		if( args[k] instanceof FunVariable ){
-		    ((FunVariable)args[k]).match(variables,values[k]);
-		    index.remove(i);
-		}else{
-		    if( args[k] instanceof FunValue ){
-			Object obj = args[k].run(variables);
-			if( obj==null || !obj.equals(values[k]) ) throw exception(FunConstants.argmismatch + values[k]);
-			index.remove(i);
-		    }else{					
-			try{
-			    FunCommand c = machine.primitive.get(aname);
-			    if(c != null ){
-				int a = c.arity();
-				Object[] toMatch = new Object[a];
-				for( int j=0; j<a; j++ )
-				    try{ 
-					toMatch[j]=args[k].args[j].run(variables); 
-				    }catch(Exception x){ toMatch[j]=null; }
-				c.input(args[k].input());
-				c.start(args[k].start);
-				Object[] objs = c.reverse(values[k], toMatch);
-				args[k].match(variables, objs);
-			    }else{
-				Object obj = args[k].run(variables);
-				if( obj==null || !obj.equals(values[k]) ) throw args[k].exception(FunConstants.argmismatch + values[k]);
-			    }
-			    index.remove(i);
-			}catch( Exception e ){
-			    ex = e;
-			    i++;
-			}
-		    }
-		}
-	    }	
+	// Checking FunValues and Variables
+	int i=0;
+	while(i<index.size()) {
+	    int k=index.get(i);
+	    if( args[k] instanceof FunValue || args[k] instanceof FunVariable ){
+		args[k].match(variables,values[k]);
+		index.remove(i);
+	    }else i++;
 	}
-	if( index.size() > 0 ) throw ex;
+	// Checking other commands	
+	int m = 1;
+	i=0;
+	while(index.size()>0 && m<3) {
+	    int k = index.get(i);
+	    if(args[k].var2assign(variables).size() <= m) {
+		String aname = args[k].name();
+		try{
+		    FunCommand c = machine.primitive.get(aname);
+		    if(c != null ){
+			int a = c.arity();
+			Object[] toMatch = new Object[a];
+			for( int j=0; j<a; j++ )
+			    try{ 
+				toMatch[j]=args[k].args[j].run(variables); 
+			    }catch(Exception x){ toMatch[j]=null; }
+			c.input(args[k].input());
+			c.start(args[k].start);
+			Object[] objs = c.reverse(values[k], toMatch);
+			args[k].match(variables, objs);
+		    }else{
+			Object obj = args[k].run(variables);
+			if( obj==null || !obj.equals(values[k]) ) throw args[k].exception(FunConstants.argmismatch + values[k]);
+		    }
+		    index.remove(i);
+		    i=-1; 
+		    m=1;
+		}catch( Exception e ){
+		    ex = e;
+		}
+	    }
+	    i++;
+	    if(i==index.size()) {
+		m++;
+		i=0;
+	    }
+	}
+	
+	if( index.size() > 0 ) {
+	    StringBuilder sb = new StringBuilder();
+	    HashMap<String,Object> uvars = var2assign(variables);
+	    for(String uv:uvars.keySet()) sb.append(" "+uv);
+	    ex = ex!=null?ex:exception(FunConstants.novar + sb.toString());
+	    throw ex;
+	}
 	return variables; 
     }
-
+    
     public HashMap<String, Object> match( Object... values ) throws Exception{ 
 	return match( new HashMap<String,Object>(), values ); 
     }
