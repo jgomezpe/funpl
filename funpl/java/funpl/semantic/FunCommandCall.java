@@ -6,7 +6,7 @@ import funpl.util.FunConstants;
 import lifya.Source;
 import speco.array.Array;
 
-public class FunCommandCall extends FunCommand {
+public class FunCommandCall extends FunObject {
     protected String name;
     protected String ho_name;
     protected FunCommandCall[] args=null;
@@ -25,6 +25,18 @@ public class FunCommandCall extends FunCommand {
     public String name(){ return name; }
     public FunCommandCall[] args(){ return args; }
 
+    public void getVars(HashMap<String,Object> vars) {
+	if( args != null )
+		for( int i=0; i<args.length; i++ )
+		    args[i].getVars(vars);
+    }
+	
+    public HashMap<String,Object> getVars() {
+	HashMap<String, Object> vars = new HashMap<String, Object>();
+	getVars(vars);
+	return vars;
+    }
+
     public HashMap<String,Object> var2assign(HashMap<String,Object> variables) {
 	HashMap<String,Object> undvars = new HashMap<String, Object>();
 	HashMap<String,Object> vars = getVars();
@@ -35,7 +47,7 @@ public class FunCommandCall extends FunCommand {
 	return undvars;
     }
     
-    protected HashMap<String, Object> match( HashMap<String, Object> variables, Object... values )
+    protected HashMap<String, Object> match( HashMap<String, Object> variables, Object[] values )
 	    throws Exception{
 	ho_name = (String)variables.get(name); 
 
@@ -56,7 +68,7 @@ public class FunCommandCall extends FunCommand {
 	while(i<index.size()) {
 	    int k=index.get(i);
 	    if( args[k] instanceof FunValue || args[k] instanceof FunVariable ){
-		args[k].match(variables,values[k]);
+		args[k].match(variables,new Object[] {values[k]});
 		index.remove(i);
 	    }else i++;
 	}
@@ -82,7 +94,8 @@ public class FunCommandCall extends FunCommand {
 			args[k].match(variables, objs);
 		    }else{
 			Object obj = args[k].run(variables);
-			if( obj==null || !obj.equals(values[k]) ) throw args[k].exception(FunConstants.argmismatch + values[k]);
+			if( obj==null || !obj.equals(values[k]) )
+			    throw args[k].exception(FunConstants.argmismatch + values[k]);
 		    }
 		    index.remove(i);
 		    i=-1; 
@@ -108,7 +121,7 @@ public class FunCommandCall extends FunCommand {
 	return variables; 
     }
     
-    public HashMap<String, Object> match( Object... values ) throws Exception{ 
+    public HashMap<String, Object> match( Object[]  values ) throws Exception{ 
 	return match( new HashMap<String,Object>(), values ); 
     }
 	
@@ -122,28 +135,14 @@ public class FunCommandCall extends FunCommand {
 	return machine.execute(this, ho_name, obj);
     }
 
-    public void getVars(HashMap<String,Object> vars) {
-	if( args != null )
-		for( int i=0; i<args.length; i++ )
-		    args[i].getVars(vars);
-    }
-	
-    public HashMap<String,Object> getVars() {
-	HashMap<String, Object> vars = new HashMap<String, Object>();
-	getVars(vars);
-	return vars;
-    }
-
-    @Override
-    public Object execute( Object... value ) throws Exception{
+    public Object apply( Object value ) throws Exception{
 	HashMap<String,Object> vars = (HashMap<String, Object>)getVars();
 	if(vars.size()!=1) throw exception(FunConstants.argnumbermismatch);
 		
-	for(String k:vars.keySet()) vars.put(k,value[0]);		
+	for(String k:vars.keySet()) vars.put(k,value);		
 	return run(vars); 
     }
 
-    @Override
     public int arity() { return (args!=null)?args.length:0; }	
 	
     public String toString(){

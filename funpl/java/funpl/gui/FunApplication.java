@@ -77,7 +77,7 @@ public class FunApplication implements Application, Configurable{
 	    sb.append(col+1);
 	    sb.append(']');
 	    ((Console)get(CONSOLE)).error(i18n(sb.toString()));	   
-	} catch (IOException e1) { }
+	} catch (IOException e1) {}
     }
     
     public void compile() { compile(program().getText()); }
@@ -100,6 +100,7 @@ public class FunApplication implements Application, Configurable{
 	    render().render(obj);
 	    return obj;
 	} catch (Exception e) {
+	    e.printStackTrace();
 	    error(e.getMessage());
 	    return null;
 	}

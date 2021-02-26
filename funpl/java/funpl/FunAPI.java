@@ -155,7 +155,7 @@ public class FunAPI implements Configurable{
 	FunCommandCall cmd=null;
 	cmd = (FunCommandCall)lang.get(src,0,command.length());
 	if( cmd != null ) {
-	    output = cmd.execute( output );
+	    output = cmd.apply( output );
 	    return output;
 	}
 	return null;

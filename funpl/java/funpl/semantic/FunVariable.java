@@ -9,15 +9,12 @@ public class FunVariable extends FunCommandCall{
     public static final String UNASSIGNED = "%unassigned";
     
     public FunVariable(Source input, int pos, FunMachine machine, String name) { super(input, pos, machine, name); }
-    public Object execute( HashMap<String,Object> variables ) throws Exception{
-	try{ return variables.get(name()); }catch(Exception e ){ throw exception(FunConstants.novar); }
-    }	
 
     @Override
     public void getVars(HashMap<String,Object> vars) { vars.put(name,UNASSIGNED); }
 
     @Override
-    public HashMap<String, Object> match( HashMap<String, Object> variables, Object... values ) 
+    public HashMap<String, Object> match( HashMap<String, Object> variables, Object[] values ) 
 	    throws Exception{
 	if( values.length!=1 )  throw exception(FunConstants.argnumbermismatch + 1 + "!=" + values.length);
 	Object value = values[0];
@@ -30,5 +27,12 @@ public class FunVariable extends FunCommandCall{
 	}
 	if( !match ) throw exception(FunConstants.argmismatch + value);
 	return variables;
+    }
+    
+    @Override
+    public Object run( HashMap<String,Object> variables ) throws Exception{
+	Object x = variables.get(name); 
+	if( x == null ) throw exception(FunConstants.novar+name);
+	return x;
     }
 }

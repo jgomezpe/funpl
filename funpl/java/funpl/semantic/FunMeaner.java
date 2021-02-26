@@ -48,7 +48,7 @@ public class FunMeaner implements Meaner{
 	}
 	
 	@SuppressWarnings("unchecked")
-	public FunCommand command(Token rule){
+	public FunObject command(Token rule){
 		switch( rule.type() ){
 			case FunConstants.VARIABLE: return new FunVariable(src, rule.start(), machine, (String)rule.value());
 			case FunConstants.VALUE: return new FunValue(src, rule.start(), machine, (String)rule.value());

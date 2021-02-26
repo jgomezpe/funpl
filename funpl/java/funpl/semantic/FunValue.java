@@ -14,13 +14,14 @@ public class FunValue extends FunCommandCall{
 	catch(Exception e){ this.e = exception(FunConstants.novalue + name); }
     }
 
-    public Object execute( HashMap<String,Object> variables ) throws Exception{
+    @Override
+    public Object run( HashMap<String,Object> variables ) throws Exception{
 	if( e != null ) throw e;
 	return obj;
     }
     
     @Override
-    public HashMap<String, Object> match( HashMap<String, Object> variables, Object... values ) 
+    public HashMap<String, Object> match( HashMap<String, Object> variables, Object[] values ) 
 	    throws Exception{
 	if( values.length!=1 )  throw exception(FunConstants.argnumbermismatch + 1 + "!=" + values.length);
 	Object value = values[0];

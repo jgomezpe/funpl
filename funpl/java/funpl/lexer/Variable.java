@@ -22,7 +22,7 @@ public class Variable implements Lexeme<String>{
 	}
 
 	public boolean followsWith(char c){ 
-	    return Character.isAlphabetic(c) || c=='_';
+	    return Character.isAlphabetic(c) || Character.isDigit(c) || c=='_';
 	}
 
 	@Override
