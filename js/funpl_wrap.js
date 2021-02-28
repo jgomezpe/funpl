@@ -231,7 +231,7 @@ Base64 ={
     }
 }
 
-/////// Lifya.js ////////////
+/////// Lyfia.js ////////////
 class Source{   
     constructor(input, id) {
         this.id = id || 'noname'
@@ -1690,7 +1690,6 @@ class FunValueInterpreter {
     get(value){}
     valid(value){}
     description(){}
-    lexeme(){}
 }
 
 class FunMachine{
@@ -1968,14 +1967,15 @@ class Application extends Configurable{
         this.program = program
         this.command = command
         this.render = render
-        this.console = console    
+        this.console = console   
         if(i18n === undefined )
             i18n = function(code){ return code }
         this.i18n = i18n
     }
- 
+  
     error(msg) {
         try {
+        console.log(msg)
             var json = JXON.parse(msg)
             var pos = json[Position.START]
             var end = json[Token.END] || pos+1

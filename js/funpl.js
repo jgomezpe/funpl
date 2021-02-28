@@ -2,7 +2,7 @@
 *
 * funpl.js
 * <P>Java Script for FunPL (Functional/Logic Programming).</P>
-* <P> Requires base64.js, kompari.js, lifya.js, and jxon.js (jxon_wrap.js). </P>
+* <P> requires base64.js, kompari.js, lifya.js, and jxon.js (jxon_wrap.js). </P>
 *
 * Copyright (c) 2021 by Jonatan Gomez-Perdomo. <br>
 * All rights reserved. See <A HREF="https://github.com/jgomezpe/lifya">License</A>. <br>
@@ -667,7 +667,6 @@ class FunValueInterpreter {
     get(value){}
     valid(value){}
     description(){}
-    lexeme(){}
 }
 
 class FunMachine{
@@ -945,14 +944,15 @@ class Application extends Configurable{
         this.program = program
         this.command = command
         this.render = render
-        this.console = console    
+        this.console = console   
         if(i18n === undefined )
             i18n = function(code){ return code }
         this.i18n = i18n
     }
- 
+  
     error(msg) {
         try {
+        console.log(msg)
             var json = JXON.parse(msg)
             var pos = json[Position.START]
             var end = json[Token.END] || pos+1
@@ -1021,84 +1021,5 @@ class Application extends Configurable{
     
     config(json) {
         this.api.config(json.api)
-    }
-}
-
-////////// TEST //////////////
-
-class TestLexeme extends Lexeme{
-    constructor(){
-        super()
-        this.type = FunConstants.VALUE
-    }
-    
-    match(input, start, end) {
-        start = start || 0
-        end = end || input.length
-        if(typeof input === 'string') input = new Source(input)        
-        if(!this.startsWith(input.get(start))) return this.error(input,start,start+1)
-        var e=start+1
-        while(e<end && this.startsWith(input.get(e))) e++
-        return this.token(input,start,e,input.substring(start,e))
-    }
-
-    startsWith(c) {
-        return c=='-' || c=='/' || c=='<' || c=='_';
-    }
-}     
-
-SyntaxTest = {
-    value(){ return new TestLexeme() },
-
-    primitive(){ return new Words(FunConstants.PRIMITIVE, ["@","|"] ) },
-
-    primitive2(){ return new Words(FunConstants.PRIMITIVE, ["@","|","+"] ) },
-    
-    lexer() {
-        var code = "% Hello World\n   //<<|rot(X)"
-        lexer = new FunLexer(true, SyntaxTest.value(), SyntaxTest.primitive())
-        try {
-            console.log(code)
-            var tokens = lexer.get(code)
-            for( var i=0; i<tokens.length; i++ ) console.log(tokens[i])
-        } catch (e) {
-            console.error(e)
-        }
-    },
-
-    print( tab, t ) {
-        var s = ''
-        var obj = t.value
-        for( var k=0; k<tab; k++ ) 
-            s += ' '
-        
-        if( Array.isArray(obj) ) {
-            s += t.type
-            console.log(s)
-            for( var i=0; i<obj.length; i++ ) {
-                this.print(tab+1, obj[i])
-            }
-        }else {
-            console.log(s+obj)
-        }
-    },
-    
-    parser() {
-        var code = "% Hello World\n0  = <\n1=@(<)|rot(X,Y)|@(Z)+<|Z";
-        var lexer = new FunLexer(true, SyntaxTest.value(), SyntaxTest.primitive2());
-        var opers = {"@":[1, 10],"|":[2, 1],"+":[2, 2]}
-        parser = new FunParser(opers,FunConstants.DEF_LIST)
-        try {
-            lexer.init(code)
-            t = parser.analize(lexer)
-            SyntaxTest.print(0,t)
-        } catch (e) {
-            console.error(e)
-        } 
-    },
-
-    main() {
-        SyntaxTest.lexer() // Uncomment to test the lexer
-        SyntaxTest.parser() // Uncomment to test the parser
     }
 }
