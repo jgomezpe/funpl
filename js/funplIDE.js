@@ -18,30 +18,33 @@ class KMain extends Client{
 
 	select(page){
 		var client = this
-		if(page=='api') window.open("https://github.com/jgomezpe/quilt")
+		if(page=='api') window.open(FunIDE.git)
 		else if(page=='ide') window.open(FunIDE.ide)
 		else if( this.page != page ){			
 			this.page = page
 			this.setParam('page', this.page)
-			var file = ((page=='home')?'i18n/':'src/plugin/'+page+'/')+this.lang+'/index'
-			Konekti.i18n(file)	
 			var cfg = FunIDE.cfg
 			if( FunIDE[page] !== undefined ) cfg = FunIDE[page].cfg
 			Konekti.resource.load(cfg, function(txt){
 				client.cfg = JXON.parse(txt)
 				function check(){
-					if(Konekti.client('coder')===undefined || Konekti.client('command')===undefined)
-						setTimeout(check,200)
-					else{
-						Konekti.ace(client.editor('coder'))
-						Konekti.ace(client.editor('command'))
-						client.api = FunIDE.api(client.cfg.fun)
-						if(FunIDE.render !== undefined){
-							client.cfg.render.id = 'render'
-							Konekti[FunIDE.render](client.cfg.render)
-						}
-						client.app = new Application(FunIDE.title, Konekti.client('coder'), Konekti.client('command'), client, client,client.api, function(msg){ return Konekti.dom.fromTemplate(msg,client.msg) } )
+					Konekti.ace(client.editor('coder'))
+					Konekti.ace(client.editor('command'))
+					client.api = FunIDE.api(client.cfg.fun)
+					if(FunIDE.render !== undefined){
+						client.cfg.render.id = 'render'
+						Konekti[FunIDE.render](client.cfg.render)
 					}
+					client.app = new Application( 
+						FunIDE.title, Konekti.client('coder'), 
+						Konekti.client('command'), 
+						client, client,client.api, 
+						function(msg){ return Konekti.dom.fromTemplate(msg,client.msg) } 
+					)
+					Konekti.i18n('i18n/'+client.lang+'/'+page, function(){
+						client.app.compile()
+						client.app.execute()
+					})	
 				}
 				if( FunIDE.render !== undefined ) Konekti.load(FunIDE.render, check)
 				else check()
@@ -92,8 +95,23 @@ function KonektiMain(){
 	var urlParams = new URLSearchParams(window.location.search)
 	var client = new KMain(urlParams.get('page'))
 
-	Konekti.box('main', "", "width:100%;height:100%","hcf", 
-		{
+	function rendered(){
+		var toolbar = Konekti.client('tools')
+		toolbar.add( 
+			{ "plugin":"dropdown", 
+				"id":"lang", "icon":"fa fa-language", "method":"language", 
+				"options":[{"id":"es","caption":"Español"}, 
+				{"id":"en","caption":"English"}]
+			})
+		var lang = urlParams.get('lang')
+		if( lang === undefined || lang === null ) lang = window.navigator.language
+		lang = lang.split('-')[0]
+		if( lang != 'es' && lang != 'en' ) lang = 'en'
+		client.language(lang)
+	}
+
+	Konekti.box('main', "", "width:100%;height:100%",{"plugin":"hcf", 
+		"content":{
 			"plugin":"sidebar",
 			"main":{
 				"plugin":"split",
@@ -132,22 +150,9 @@ function KonektiMain(){
 				]
 			}
 		},
-		{"plugin":"header","icon":"fa fa-th-large", "caption":FunIDE.title+" Programming Language", "h":4, "style":"w3-teal w3-center", "id":"title"},
-		{"plugin":"header","id":"foot", "caption":"Developed by Professor Jonatan Gomez, Ph. D.", "h":6, "style":"w3-teal w3-center"}
+		"header":{"plugin":"header","icon":"fa fa-th-large", "caption":FunIDE.title+" Programming Language", "h":4, "style":"w3-teal w3-center", "id":"title"},
+		"footer":{"plugin":"header","id":"foot", "caption":"Developed by Professor Jonatan Gomez, Ph. D.", "h":6, "style":"w3-teal w3-center"}}, rendered
 	)
-
-	function rendered(){
-		var toolbar = Konekti.client('tools')
-		toolbar.add( {"plugin":"dropdown", "id":"lang", "icon":"fa fa-language", "method":"language", 
-		"options":[{"id":"es","caption":"Español"}, {"id":"en","caption":"English"}]} )
-		var lang = urlParams.get('lang')
-		if( lang === undefined || lang === null ) lang = window.navigator.language
-		lang = lang.split('-')[0]
-		if( lang != 'es' && lang != 'en' ) lang = 'en'
-		client.language(lang)
-	}
-
-	Konekti.dom.check( rendered, 'toc', 'tools', 'info', 'coder', 'render' )
 }
 
 Konekti.uses('box','tree')
