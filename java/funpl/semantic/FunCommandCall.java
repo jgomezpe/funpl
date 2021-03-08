@@ -42,7 +42,7 @@ public class FunCommandCall extends FunObject {
 	HashMap<String,Object> vars = getVars();
 	for( String v:vars.keySet() ) {
 	    Object o = variables.get(v);
-	    if(o==null || o.equals(FunVariable.UNASSIGNED)) undvars.put(v, FunVariable.UNASSIGNED);
+	    if(o==null || o==FunVariable.UNASSIGNED) undvars.put(v, FunVariable.UNASSIGNED);
 	}
 	return undvars;
     }
