@@ -1,6 +1,5 @@
 package funpl.semantic;
 
-import java.io.IOException;
 import java.util.HashMap;
 
 import funpl.util.FunConstants;
@@ -70,7 +69,7 @@ public class FunProgram extends FunCommand{
 		e = null;
 		for( FunCommandDef c:candidates ){
 			try{ return c.execute(values); }
-			catch(IOException ex){
+			catch(Exception ex){
 			    e = ex;
 				//if( e != null ) e.add(ex); else e = new LanguageMultiException(ex);
 			}

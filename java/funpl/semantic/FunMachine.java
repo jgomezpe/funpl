@@ -1,6 +1,5 @@
 package funpl.semantic;
 
-import java.io.IOException;
 import java.util.HashMap;
 
 import funpl.util.FunConstants;
@@ -78,7 +77,7 @@ public class FunMachine{
 	program.start(pos.start());
 	try{
 	    return program.execute(command, args);
-	}catch(IOException e ){
+	}catch(Exception e ){
 	    if(program.defined(command) && !program.constant(command) && args.length==0 ) return command;
 	    else throw e;
 	}	
