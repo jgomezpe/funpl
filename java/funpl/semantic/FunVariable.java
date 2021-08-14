@@ -20,7 +20,9 @@ public class FunVariable extends FunCommandCall{
 	Object value = values[0];
 	Object obj = variables.get(name);
 	boolean match = true;
-	if(obj!=null) match = obj.equals(value);
+	if(obj!=null) {
+	    match = obj.equals(value);
+	}
 	else {
 	    match = machine.can_assign(name, value);
 	    if(match) variables.put(name,value);

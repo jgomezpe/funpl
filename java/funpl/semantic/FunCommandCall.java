@@ -73,42 +73,40 @@ public class FunCommandCall extends FunObject {
 	    }else i++;
 	}
 	// Checking other commands	
-	int m = 1;
-	i=0;
-	while(index.size()>0 && m<3) {
-	    int k = index.get(i);
-	    if(args[k].var2assign(variables).size() <= m) {
-		String aname = args[k].name();
-		try{
-		    FunCommand c = machine.primitive.get(aname);
-		    if(c != null ){
-			int a = c.arity();
-			Object[] toMatch = new Object[a];
-			for( int j=0; j<a; j++ )
-			    try{ 
-				toMatch[j]=args[k].args[j].run(variables); 
-			    }catch(Exception x){ toMatch[j]=null; }
-			c.input(args[k].input());
-			c.start(args[k].start);
-			Object[] objs = c.reverse(values[k], toMatch);
-			args[k].match(variables, objs);
-		    }else{
-			Object obj = args[k].run(variables);
-			if( obj==null || !obj.equals(values[k]) )
-			    throw args[k].exception(FunConstants.argmismatch + values[k]);
-		    }
-		    index.remove(i);
-		    i=-1; 
-		    m=1;
-		}catch( Exception e ){
-		    ex = e;
+	while(index.size()>0 && ex==null) {
+	    i = 0;
+	    int k = index.get(0); 
+	    int m1=args[k].var2assign(variables).size();
+	    for( int j=1; j<index.size(); j++ ) {
+		int k2 = index.get(j); 
+		int m2=args[k2].var2assign(variables).size();
+		if( m2 < m1 ) {
+		    k = k2;
+		    m1 = m2;
+		    i = j;
 		}
 	    }
-	    i++;
-	    if(i==index.size()) {
-		m++;
-		i=0;
-	    }
+	    try{
+		String aname = args[k].name();
+		FunCommand c = machine.primitive.get(aname);
+		if(c != null ){
+		    int a = c.arity();
+		    Object[] toMatch = new Object[a];
+		    for( int j=0; j<a; j++ )
+			try{ 
+			    toMatch[j]=args[k].args[j].run(variables); 
+			}catch(Exception x){ toMatch[j]=null; }
+		    c.input(args[k].input());
+		    c.start(args[k].start);
+		    Object[] objs = c.reverse(values[k], toMatch);
+		    args[k].match(variables, objs);
+		}else{
+		    Object obj = args[k].run(variables);
+		    if( obj==null || !obj.equals(values[k]) )
+			throw args[k].exception(FunConstants.argmismatch + values[k]);
+		}
+		index.remove(i);
+	    }catch( Exception e ){ ex = e; }	    
 	}
 	
 	if( index.size() > 0 ) {

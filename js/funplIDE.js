@@ -1,3 +1,18 @@
+/**
+*
+* funplIDE.js
+* <P>Java Script defining the IDE of a FunPL (Functional/Logic Programming Language).</P>
+* <P> requires base64.js, kompari.js, lifya.js, and jxon.js (jxon_wrap.js). </P>
+* <P>A numtseng module <A HREF="https://numtseng.com/modules/funplIDE.js">https://numtseng.com/modules/funplIDE.js</A> 
+*
+* Copyright (c) 2021 by Jonatan Gomez-Perdomo. <br>
+* All rights reserved. See <A HREF="https://github.com/jgomezpe/funpl">License</A>. <br>
+*
+* @author <A HREF="https://disi.unal.edu.co/~jgomezpe/"> Professor Jonatan Gomez-Perdomo </A>
+* (E-mail: <A HREF="mailto:jgomezpe@unal.edu.co">jgomezpe@unal.edu.co</A> )
+* @version 1.0
+*/
+
 
 class KMain extends Client{
 	constructor( page ){

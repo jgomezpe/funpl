@@ -12,13 +12,12 @@ import lifya.Position;
 import lifya.Token;
 import lifya.lexeme.Symbol;
 import utila.I18N;
-import aplikigo.Application;
 import aplikigo.Component;
 import aplikigo.gui.Console;
 import aplikigo.gui.Render;
 import aplikigo.gui.Editor;
 
-public class FunApplication implements Application, Configurable{
+public class FunApplication implements Component, Configurable{
     public String PROGRAM = "program";
     public String COMMAND = "command";
     public String RENDER = "render";
@@ -161,17 +160,5 @@ public class FunApplication implements Application, Configurable{
 	    RENDER = tag;
 	}
 	api.config(json.object("api"));
-    }
-
-    @Override
-    public boolean accessible(String object, String method) {
-	// TODO Auto-generated method stub
-	return true;
-    }
-
-    @Override
-    public boolean authorized(JXON user, String object, String method) {
-	// TODO Auto-generated method stub
-	return false;
     }
 }

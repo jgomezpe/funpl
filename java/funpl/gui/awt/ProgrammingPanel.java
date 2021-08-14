@@ -37,11 +37,11 @@ import lifya.lexeme.Symbol;
 import utila.I18N;
 import aplikigo.gui.Render;
 import aplikigo.gui.TitleComponent;
-import aplikigo.gui.awt.Console;
-import aplikigo.gui.awt.FileFilter;
-import aplikigo.gui.awt.JFontChooser;
-import aplikigo.gui.awt.LogPanel;
-import aplikigo.gui.awt.rsyntax.Editor;
+import aplikigo.awt.Console;
+import aplikigo.awt.FileFilter;
+import aplikigo.awt.JFontChooser;
+import aplikigo.awt.LogPanel;
+import aplikigo.awt.rsyntax.Editor;
 import aplikigo.stream.Resource;
 
 public class ProgrammingPanel  extends JPanel{

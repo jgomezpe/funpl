@@ -3,9 +3,10 @@
 * funpl.js
 * <P>Java Script for FunPL (Functional/Logic Programming).</P>
 * <P> requires base64.js, kompari.js, lifya.js, and jxon.js (jxon_wrap.js). </P>
+* <P>A numtseng module <A HREF="https://numtseng.com/modules/funpl.js">https://numtseng.com/modules/funpl.js</A> 
 *
 * Copyright (c) 2021 by Jonatan Gomez-Perdomo. <br>
-* All rights reserved. See <A HREF="https://github.com/jgomezpe/lifya">License</A>. <br>
+* All rights reserved. See <A HREF="https://github.com/jgomezpe/funpl">License</A>. <br>
 *
 * @author <A HREF="https://disi.unal.edu.co/~jgomezpe/"> Professor Jonatan Gomez-Perdomo </A>
 * (E-mail: <A HREF="mailto:jgomezpe@unal.edu.co">jgomezpe@unal.edu.co</A> )
