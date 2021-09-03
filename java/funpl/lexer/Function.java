@@ -6,11 +6,22 @@ import lifya.Source;
 import lifya.Token;
 
 public class Function implements Lexeme<String>{
-    protected boolean withNumber;
-	public Function(){ this(true); }
+	protected boolean number;
+	protected boolean letter;
+	protected String start;
+    
+	public Function(){ this(true,true,""); }
 	
-	public Function(boolean canStartWithNumber ){ 
-		this.withNumber = canStartWithNumber;
+	public Function(boolean canStartWithLetter, boolean canStartWithNumber, String start ){ 
+		this.number = canStartWithNumber;
+		this.letter = canStartWithLetter;
+		this.start=start!=null?start:"";
+	}
+
+	public Function(String start ){ this(false,false,start); }
+
+	public Function(boolean canStartWithLetter, boolean canStartWithNumber ){ 
+		this(canStartWithLetter, canStartWithNumber, "");
 	}
 
 	@Override
@@ -24,7 +35,7 @@ public class Function implements Lexeme<String>{
 	
 	@Override
 	public boolean startsWith(char c){ 
-	    return Character.isLowerCase(c) || (withNumber && Character.isDigit(c)) ;
+	    return (letter && Character.isLowerCase(c)) || (number && Character.isDigit(c)) || start.indexOf(c)>=0;
 	}
 
 	public boolean followsWith(char c){ 

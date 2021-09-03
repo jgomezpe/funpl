@@ -31,18 +31,19 @@ import funpl.lexer.FunLexer;
 import funpl.FunAPI;
 import funpl.gui.FunApplication;
 import funpl.util.FunConstants;
-import jxon.JXON;
+import jxon.JXONReader;
+import speco.jxon.JXON;
 import lifya.lexeme.Space;
 import lifya.lexeme.Symbol;
 import utila.I18N;
 import aplikigo.gui.Render;
 import aplikigo.gui.TitleComponent;
-import aplikigo.awt.Console;
+import aplikigo.awt.AWTConsole;
 import aplikigo.awt.FileFilter;
 import aplikigo.awt.JFontChooser;
 import aplikigo.awt.LogPanel;
-import aplikigo.awt.rsyntax.Editor;
-import aplikigo.stream.Resource;
+import aplikigo.awt.rsyntax.RSEditor;
+import speco.stream.Resource;
 
 public class ProgrammingPanel  extends JPanel{
 	/**
@@ -50,9 +51,6 @@ public class ProgrammingPanel  extends JPanel{
 	 */
 	private static final long serialVersionUID = -3339559167222155206L;
 
-	protected static final String images="image/";
-	protected static final String i18n="language/";
-	
 	String title;
 	String fileName = null;
 	String fileDir = ".";
@@ -68,7 +66,7 @@ public class ProgrammingPanel  extends JPanel{
 	BorderLayout windowPaneLayout = new BorderLayout();
 	
 	// The program area
-	Editor programEditor;
+	RSEditor programEditor;
 	
 	// The tool bar
 	JToolBar toolBar = new JToolBar();
@@ -84,7 +82,7 @@ public class ProgrammingPanel  extends JPanel{
 	
 	// The log area
 	LogPanel logPanel = new LogPanel();
-	Console log;   
+	AWTConsole log;   
 
 
 	//Log command area
@@ -100,13 +98,12 @@ public class ProgrammingPanel  extends JPanel{
 	JPanel commandBar = new JPanel();
 	BorderLayout commandLayout = new BorderLayout();
 	JLabel commandLabel = new JLabel();
-	Editor commandEditor;
+	RSEditor commandEditor;
 	JButton commandBtn = new JButton();
 	JButton applyBtn = new JButton();
 	JPanel commandBtnsPanel = new JPanel();
 
 	// Resources
-	Resource resource;
 	
 	//
 	FunAPI api;
@@ -115,9 +112,8 @@ public class ProgrammingPanel  extends JPanel{
 	
 	public LogPanel getLogPanel(){ return logPanel; }
 
-	public ProgrammingPanel(TitleComponent parent, FunAPI api, String api_code, Render render, Resource resource ) {
+	public ProgrammingPanel(TitleComponent parent, FunAPI api, String api_code, Render render ) {
 		this.render = render;
-		this.resource = resource;
 		this.api = api;
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		int width = (int)screenSize.getWidth();
@@ -145,7 +141,7 @@ public class ProgrammingPanel  extends JPanel{
 	    try {
 		String api_code = readFile(file);
 		if(api_code!=null) {
-		    	JXON json = JXON.parse(api_code);
+		    	JXON json = JXONReader.apply(api_code);
 			api.config(json.object(GUIFunConstants.FUN));
 			render.config(json.object(Render.TAG));
 			HashMap<String, Integer> map = rSyntaxEditorTokens();
@@ -184,7 +180,7 @@ public class ProgrammingPanel  extends JPanel{
 			((JFrame)parent).setIconImage(image("remnant.png"));
 			
 			// Program area
-			programEditor = new Editor("program");
+			programEditor = new RSEditor("program");
 			
 			//program_editor.setStyle(SyntaxStyle.get(styles));
 			JTextComponent jProgram = programEditor.editArea();
@@ -224,7 +220,7 @@ public class ProgrammingPanel  extends JPanel{
 
 
 			//Log area
-			log = new Console(logPanel);
+			log = new AWTConsole(logPanel);
 			logCommandArea.setLayout(logCommandLayout);	
 			logCommandArea.add(logPanel, java.awt.BorderLayout.CENTER);
 			// logCommandArea.add(jCommandBar, java.awt.BorderLayout.NORTH);
@@ -241,7 +237,7 @@ public class ProgrammingPanel  extends JPanel{
 			commandBar.setLayout(commandLayout);
 			commandBar.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.RAISED));
 			
-			commandEditor = new Editor("command");
+			commandEditor = new RSEditor("command");
 			
 			JTextComponent jCommand = commandEditor.editArea();
 			jCommand.setToolTipText("");
@@ -284,7 +280,7 @@ public class ProgrammingPanel  extends JPanel{
 	}
 	
 	protected Image image(String name) {
-	    try{ return resource.image(images+name); }catch(Exception e) { e.printStackTrace();}
+	    try{ return Resource.image(FunConstants.imgs+name); }catch(Exception e) { e.printStackTrace();}
 	    return null;
 	}
 	
@@ -294,7 +290,7 @@ public class ProgrammingPanel  extends JPanel{
 	}
 	
 	protected String readFile(String file ){
-		try { return resource.txt(file); }catch (Exception e){ log.error(i18n(e.getMessage())); }
+		try { return Resource.txt(file); }catch (Exception e){ log.error(i18n(e.getMessage())); }
 		return null;
 	}
 	
@@ -395,11 +391,11 @@ public class ProgrammingPanel  extends JPanel{
 	public void applyBtn_actionPerformed(ActionEvent actionEvent){ app.apply(); }
 	
 	public void language(ActionEvent actionEvent){ 
-		String file = chooseFile( GUIFunConstants.FML, i18n );
+		String file = chooseFile( GUIFunConstants.FML, FunConstants.i18n );
 		if( file != null ){
 			try {
 			    I18N.clear();
-			    I18N.set(resource.txt(file));
+			    I18N.set(JXONReader.apply(Resource.txt(file)));
 			    setLanguage();
 			} catch (IOException e) {
 			    log.error(e.getMessage());

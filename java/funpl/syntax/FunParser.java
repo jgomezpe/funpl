@@ -8,9 +8,11 @@ import lifya.lookahead.Rule;
 public class FunParser extends LAHParser{
     
     protected static Rule[] rules(HashMap<String, int[]> operator_priority) { return new Rule[] {
-	    new Definition(null),
+        new Definition(null),
+        new ExpressionList(null),
 	    new DefList(null),
 	    new Expression(null,operator_priority),
+	    new Argument(null),
 	    new Arguments(null),
 	    new Command(null)
     }; }

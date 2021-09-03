@@ -1,6 +1,6 @@
 package funpl;
 
-import jxon.JXON;
+import speco.jxon.JXON;
 
 public interface FunAPILoader {
     FunAPI load( JXON json );

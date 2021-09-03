@@ -14,7 +14,7 @@ public class Command extends Rule{
     }
 
     @Override
-    public Token analize(Lexer lexer, Token current) {
+    public Token analyze(Lexer lexer, Token current) {
 	if(!startsWith(current)) return current.toError();
 	Source input = current.input();
 	int start = current.start();
@@ -26,7 +26,7 @@ public class Command extends Rule{
 	    Token c = lexer.next();
 	    lexer.goback();
 	    if(c!=null && check_symbol(c, '(')) {
-		Token args = parser.analize(FunConstants.ARGS, lexer);
+		Token args = parser.analyze(FunConstants.ARGS, lexer);
 		if(args.isError()) return args;
 		command.add(args);
 		end = args.end();

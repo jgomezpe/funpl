@@ -3,6 +3,7 @@ package funpl.semantic;
 import lifya.Position;
 import lifya.Source;
 import lifya.Token;
+import lifya.stringify.Stringifier;
 
 public abstract class FunObject extends Position{
 	protected FunMachine machine;
@@ -17,7 +18,7 @@ public abstract class FunObject extends Position{
 
 	protected Exception exception(String code){
 	    	Token t = new Token(this.input(), this.start(), this.start()+1, code);
-		return new Exception(t.stringify());
+		return new Exception(Stringifier.apply(t));
 	}
 	
 	public abstract String name();

@@ -6,11 +6,11 @@ import java.awt.event.*;
 import javax.swing.*;
 
 import funpl.FunAPI;
+import funpl.util.FunConstants;
+import jxon.JXONReader;
 import aplikigo.gui.Render;
 import aplikigo.gui.TitleComponent;
-import aplikigo.stream.Resource;
-import aplikigo.stream.loader.FromClassLoader;
-import aplikigo.stream.loader.FromOS;
+import speco.stream.Resource;
 import utila.I18N;
 
 /**
@@ -58,15 +58,10 @@ import utila.I18N;
 * @version 1.0
 */
 public class ProgrammingFrame extends JFrame implements TitleComponent {
-   	public static Resource init( ClassLoader loader, String lang ) {
-		lang = "language/"+lang+".i18n";
-		Resource resource = new Resource();
-		resource.add("local", new FromOS("resources/"));
-		resource.add("loader", new FromClassLoader(loader));
-		resource.add("guilocal", new FromOS(""));
-		try { I18N.set(resource.txt(lang)); }
+   	public static void init( String lang ) {
+		lang = FunConstants.i18n+lang+".i18n";
+		try { I18N.set(JXONReader.apply(Resource.txt(lang))); }
 		catch(Exception e) { e.printStackTrace(); } 
-		return resource;
    	}
 
 	/**
@@ -79,13 +74,13 @@ public class ProgrammingFrame extends JFrame implements TitleComponent {
 	BorderLayout windowLayout = new BorderLayout();
 	BorderLayout windowPaneLayout = new BorderLayout();
 
-	public ProgrammingFrame(FunAPI api, String api_code, Render render, ClassLoader loader, String lang){
-	    	Resource resource = init(loader, lang);
+	public ProgrammingFrame(FunAPI api, String api_code, Render render, String lang){
+	    	init(lang);
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		int width = (int)screenSize.getWidth();
 		int height = (int)screenSize.getHeight();
 		this.setSize(new Dimension(width*4/5, height*4/5));
-		windowPanel = new ProgrammingPanel(this, api, api_code, render, resource);
+		windowPanel = new ProgrammingPanel(this, api, api_code, render);
 		this.getContentPane().setLayout(windowLayout);
 		this.getContentPane().add(windowPanel, java.awt.BorderLayout.CENTER);
 		// Closing the window

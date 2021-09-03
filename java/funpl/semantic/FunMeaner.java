@@ -37,10 +37,20 @@ public class FunMeaner implements Meaner{
 		try{ return v.get(i); }catch(Exception e){ return null; }
 	}
 		
-	protected FunCommand command_def(Array<Token> v){
-		return new FunCommandDef(machine, (FunCommandCall)command(v.get(0)), (FunCommandCall)command(v.get(1)));
+	protected FunCommandCall command_explist(Array<Token> v){
+		if(v.size()==1) return (FunCommandCall)command(v.get(0));
+		FunCommandCall[] commands = new FunCommandCall[v.size()];
+		for( int i=0; i<v.size(); i++ )
+			commands[i] = (FunCommandCall)command(v.get(i));
+		return new FunTuple(machine, commands);
 	}
-
+	
+	@SuppressWarnings("unchecked")
+	protected FunCommand command_def(Array<Token> v){
+		return new FunCommandDef(machine, (FunCommandCall)command(v.get(0)), 
+				command_explist((Array<Token>)v.get(1).value()) );
+	}
+	
 	protected FunProgram command_def_list(Array<Token> list){
 		Array<FunCommandDef> defs = new Array<FunCommandDef>();
 		for(Token s:list) defs.add((FunCommandDef)command(s));
@@ -52,6 +62,7 @@ public class FunMeaner implements Meaner{
 		switch( rule.type() ){
 			case FunConstants.VARIABLE: return new FunVariable(src, rule.start(), machine, (String)rule.value());
 			case FunConstants.VALUE: return new FunValue(src, rule.start(), machine, (String)rule.value());
+			case FunConstants.EXPLIST: return command_explist((Array<Token>)rule.value());
 			case FunConstants.DEFINITION: return command_def((Array<Token>)rule.value());
 			case FunConstants.DEF_LIST: return command_def_list((Array<Token>)rule.value());
 			case FunConstants.COMMAND: return command((Array<Token>)rule.value());

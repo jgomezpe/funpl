@@ -4,6 +4,8 @@ public class FunConstants {
 	// FunMachine
 	public static final String novalue = "·No valid value· ";
 	public static final String NUMBERID = "numberid";
+	public static final String LETTERID = "numberid";
+	public static final String STARTID = "startid";
 
 	// FunEncoder
 	public static final String code="code";
@@ -28,9 +30,12 @@ public class FunConstants {
 	// FunParser
 	public static final String EXPRESSION="expression";
 	public static final String DEFINITION="definition";
+	public static final String EXPLIST="expressionlist";
 	public static final String DEF_LIST="list";
 	public static final String COMMAND="command";
+	public static final String ARG="arg";
 	public static final String ARGS="args";
+	public static final String TUPLE="tuple";
 	
 	public static final String expected="·Expecting· ";
 	public static final String unexpected="·Unexpected· ";
@@ -41,4 +46,10 @@ public class FunConstants {
 	public static final String argmismatch="·Argument mismatch· ";
 	public static final String argnumbermismatch="·Argument number mismatch· ";
 	public static final String novar="·No a variable· ";	
+	public static final String notuple="·No a tuple· ";	
+	
+	// FunAPI
+	public static final String i18n="language/";
+	public static final String machine="machine/";
+	public static final String imgs="image/";
 }

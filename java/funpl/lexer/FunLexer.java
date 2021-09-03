@@ -7,10 +7,10 @@ import lifya.lexeme.Symbol;
 import lifya.lookahead.LAHLexer;
 
 public class FunLexer extends LAHLexer{
-    public FunLexer( boolean canStartWithNumber, Lexeme<?> value, Lexeme<String> primitive ) {
+    public FunLexer( Function f, Lexeme<?> value, Lexeme<String> primitive ) {
 	super( new Lexeme[] {
 		new Variable(),
-		new Function(canStartWithNumber),
+		f,
 		value, primitive,
 		new Symbol("()=,"),
 		new Comment(),

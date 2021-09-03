@@ -3,6 +3,7 @@ package test;
 import java.util.HashMap;
 
 import funpl.lexer.FunLexer;
+import funpl.lexer.Function;
 import funpl.syntax.FunParser;
 import funpl.util.FunConstants;
 import lifya.Source;
@@ -45,7 +46,7 @@ public class SyntaxText {
     
 	public static void lexer() {
 	    String code = "% Hello World\n   //<<|rot(X)";
-	    FunLexer lexer = new FunLexer(true, value(), primitive());
+	    FunLexer lexer = new FunLexer(new Function(), value(), primitive());
 	    try {
 		System.out.println(code);
 		Array<Token> tokens = lexer.get(code);
@@ -78,7 +79,7 @@ public class SyntaxText {
 	
 	public static void parser() {
 	    String code = "% Hello World\n0  = <\n1=@(<)|rot(X,Y)|@(Z)+<|Z";
-	    FunLexer lexer = new FunLexer(true, value(), primitive2());
+	    FunLexer lexer = new FunLexer(new Function(), value(), primitive2());
 	    try {
 		System.out.println("***********");
 		System.out.println(code);
@@ -95,7 +96,7 @@ public class SyntaxText {
 	    FunParser parser = new FunParser(opers,FunConstants.DEF_LIST);
 	    try {
 		lexer.init(code);
-		Token t = parser.analize(lexer);
+		Token t = parser.analyze(lexer);
 		print(0,t);
 	    } catch (Exception e) {
 		e.printStackTrace();

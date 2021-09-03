@@ -14,14 +14,14 @@ public class DefList  extends Rule{
     public boolean startsWith(Token t) { return t.type()==FunConstants.FUNCTION; }
     
     @Override
-    public Token analize(Lexer lexer, Token current) {
+    public Token analyze(Lexer lexer, Token current) {
 	if(!startsWith(current)) return current.toError();
 	Source input = current.input();
 	int start = current.start();
 	int end = current.end();
 	Array<Token> list = new Array<Token>();
 	while(current!=null && startsWith(current)){
-	    Token t = parser.rule(FunConstants.DEFINITION).analize(lexer, current);
+	    Token t = parser.rule(FunConstants.DEFINITION).analyze(lexer, current);
 	    if(t.isError()) return t;
 	    list.add(t);
 	    end = current.end();

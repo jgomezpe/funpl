@@ -5,8 +5,9 @@ import java.util.HashMap;
 
 import funpl.FunAPI;
 import funpl.util.FunConstants;
-import jxon.Configurable;
-import jxon.JXON;
+import jxon.JXONReader;
+import speco.jxon.JXON;
+import speco.object.Configurable;
 import speco.object.Named;
 import lifya.Position;
 import lifya.Token;
@@ -45,7 +46,7 @@ public class FunApplication implements Component, Configurable{
  
     public void error(String msg) {
 	try {
-	    JXON json = JXON.parse(msg);
+	    JXON json = JXONReader.apply(msg);
 	    int pos = json.integer(Position.START);
 	    int end = json.valid(Token.END)?json.integer(Token.END):pos+1;
 	    int row = json.integer(Position.ROW);
