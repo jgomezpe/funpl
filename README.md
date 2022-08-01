@@ -14,8 +14,7 @@ For compiling the Java version, the following libraries are required: kerno.jar,
 ## Javascript
 For intrepreting the Javascript version, the following modules are required: kompari.js, lifya.js, jxon.js, and konekti.js
 
-&nbsp;A Javascript wrap (containing all the modules and the FunPL classes) is also available: <A HREF="https://jgomezpe.github.io/funpl/src/js/funpl_wrap.js">https://jgomezpe.github.io/funpl/src/js/funpl_wrap.js</A>, 
-
+&nbsp;A Javascript wrap (containing all the modules and the FunPL classes) is also available: <A HREF="https://jgomezpe.github.io/funpl/src/js/funpl_wrap.js">https://jgomezpe.github.io/funpl/src/js/funpl_wrap.js</A>
 
 <h3>Version 1.0</h3>
 <h3>Copyright (c)</h3>
