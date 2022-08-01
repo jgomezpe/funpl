@@ -1,16 +1,17 @@
 # FunPL: A class of Functional Programming Languages with Unification
 FunPL is a class of Functional Programming Languages with Unification process (unification process as used by logic programming languages). A language in the FunPL class uses functions instead of predicates, a set of semantic term rewriting rules, case based definition of functions similar to rules and facts in Prolog, a semantic unification algorithm, and a backtracking mechanism. 
 
-&nbsp;Two different implementations are available: using Java and using Javascript
+&nbsp;Two different implementations are available: using Java and using Javascript.
 
-##Java
+## Java
+
 For compiling the Java version, the following libraries are required: kerno.jar, speco.jar, kompari.jar, lifya.jar, jxon.jar, and  rsyntaxtextarea-3.0.0-SNAPSHOT.jar
 
 &nbsp;These libraries are available at <A HREF="https://github.com/jgomezpe/libs/">https://github.com/jgomezpe/libs/</A>
 
 &nbsp;A Java ready to use library is also available: <A HREF="https://github.com/jgomezpe/libs/funpl.jar">https://github.com/jgomezpe/libs/funpl.jar</A>
 
-##Javascript
+## Javascript
 For intrepreting the Javascript version, the following modules are required: kompari.js, lifya.js, jxon.js, and konekti.js
 
 &nbsp;A Javascript wrap (containing all the modules and the FunPL classes) is also available: <A HREF="https://jgomezpe.github.io/funpl/src/js/funpl_wrap.js">https://jgomezpe.github.io/funpl/src/js/funpl_wrap.js</A>, 
