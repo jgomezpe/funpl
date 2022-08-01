@@ -13,83 +13,69 @@
 * @version 1.0
 */
 
+/**
+*
+* python.js
+* <P>A client for a Python server (See <A HREF="https://github.com/jgomezpe/aplikigo">aplikigo</A> package) </P>
+* <P>Requires Konekti.js, and finapunkto.js </P>
+* <P>A numtseng module <A HREF="https://numtseng.com/modules/python.js">https://numtseng.com/modules/python.js</A> 
+* Copyright (c) 2021 by Jonatan Gomez-Perdomo. <br>
+* All rights reserved. See <A HREF="https://github.com/jgomezpe/python">License</A>. <br>
+*
+* @author <A HREF="https://disi.unal.edu.co/~jgomezpe/"> Professor Jonatan Gomez-Perdomo </A>
+* (E-mail: <A HREF="mailto:jgomezpe@unal.edu.co">jgomezpe@unal.edu.co</A> )
+* @version 1.0
+*/
 
-class KMain extends Client{
-	constructor( page ){
-		super('client')
-		if( page === undefined || page === null ) page = 'home'
-		this.page = page
-		this.lang = ''
+Konekti.load('split', 'ace', 'navbar')
+
+/** Konekti Plugin for Python */
+class FunPLPlugIn extends PlugIn{
+    /** Creates a Plugin for Python */
+    constructor(){ super('funpl') }
+    
+    /**
+     * Creates a client for the plugin's instance
+     * @param config Python configuration
+     */
+    client(config){ return new FunPLClient(config) }
+}
+
+if( Konekti.funpl===undefined) new FunPLPlugIn()
+
+
+/*
+ *
+ * A client for a Python server
+ */  
+class FunPLClient extends Client{
+	/**
+	 * Creates a Python server client
+	 * @param config Configuration includes
+	 * id: GUI's id,
+	 * editor: Editor's id
+	 * url: Python's server url
+	 * run: Run button's id 
+	 * console: Console/Terminal's id
+	 * type If python console will be displayed as a row ('row') or as a column ('col') 
+	 * captionRun Caption for the run button when ready for running python code (to start code running)
+	 * captionStop Caption for the run button when running python code (to stop code running)
+	 */
+	constructor(config){
+		super(config)
+		var x = this
+		x.api = config.api
+		x.app = new Application( x.id, Konekti.client[x.id+'Coder'],  Konekti.client[x.id+'Command'], x, x, x.api, 
+			function(msg){ return Konekti.dom.fromTemplate(msg,x.msg) } 
+		)	
 	}
-	
+
+	console(){ return Konekti.client[this.id+'Console'] }
+
 	out( msg ){ this.console().setText(this.app.i18n(msg.replace("\n","<br>"))) }
 	error( msg ){ this.console().setText(this.app.i18n(msg.replace("\n","<br>"))) }
-
-	setParam( param, value ){
-		var urlParams = new URLSearchParams(window.location.search)
-		urlParams.set(param, value)
-		history.replaceState(null, null, "?"+urlParams.toString())
-	}
-
-	select(page){
-		var client = this
-		if(page=='api') window.open(FunIDE.git)
-		else if(page=='ide') window.open(FunIDE.ide)
-		else if( this.page != page ){			
-			this.page = page
-			this.setParam('page', this.page)
-			var cfg = FunIDE.cfg
-			if( FunIDE[page] !== undefined ) cfg = FunIDE[page].cfg
-			Konekti.resource.load(cfg, function(txt){
-				client.cfg = JXON.parse(txt)
-				function check(){
-					Konekti.ace(client.editor('coder'))
-					Konekti.ace(client.editor('command'))
-					client.api = FunIDE.api(client.cfg.fun)
-					if(FunIDE.render !== undefined){
-						client.cfg.render.id = 'render'
-						Konekti[FunIDE.render](client.cfg.render)
-					}
-					client.app = new Application( 
-						FunIDE.title, Konekti.client('coder'), 
-						Konekti.client('command'), 
-						client, client,client.api, 
-						function(msg){ return Konekti.dom.fromTemplate(msg,client.msg) } 
-					)
-					Konekti.i18n('i18n/'+client.lang+'/'+page, function(){
-						client.app.compile()
-						client.app.execute()
-					})	
-				}
-				if( FunIDE.render !== undefined ) Konekti.load(FunIDE.render, check)
-				else check()
-			} )
-		}
-	}
 	
-	language(lang){
-		var client = this
-		if( lang != this.lang ){
-			Konekti.resource.JSON('i18n/'+lang+'/'+FunIDE.language, function(json){ client.msg = json })
-			if(this.lang=='') Konekti.resource.JSON('i18n/'+lang+'/toc', Konekti.tree )
-			else Konekti.i18n('i18n/'+lang+'/toc')
-			Konekti.i18n('i18n/'+lang+'/component')
-			this.lang = lang
-			this.setParam('lang',this.lang)
-			var page = this.page
-			this.page = ''	
-			this.select(page)
-		}
-	}
-	
-	console(){ return Konekti.client('console') }
-	
-	render(obj){ 
-		if( FunIDE.show === undefined )
-			Konekti.client('render').setText(obj) 
-		else
-			FunIDE.show(obj)
-	}
+	render(obj){ Konekti.client[this.id+'Render'].setText(obj) }
 
 	remnants(){ this.out(this.api.values()) }
 
@@ -99,76 +85,55 @@ class KMain extends Client{
 
 	run(){ this.app.execute(this.app.command.getText()) }
 
-	editor(id){
-		this.cfg.ace.id = id 
-		return this.cfg.ace
-	}
+	apply(){ this.app.apply(this.app.command.getText()) }
 }
 
+/**
+ * Creates a FunPL client object
+ * @param id GUI's id,
+ * @param width Width of the component
+ * @param height Height of the component
+ * @param type If component will be displayed as a row ('row') or as a column ('col') 
+ * @param mode Programming language mode 
+ * @param code ACE code for syntax highlighting the programming language
+ * @param api Programming language API
+ * @param render Programming language render component
+ * @param parent Parent component 
+ */
+Konekti.funplConfig = function(id, width, height, type, mode, code, api, render, parent='KonektiMain'){
+	var editor = Konekti.aceConfig(id+'Coder', '100%', '100%', '', mode, 'eclipse', code)
+	var term = Konekti.divConfig(id+'Console', '100%', '100%', '', '', id+'One')
+	var one = Konekti.splitConfig(id+'One', '100%', '100%', 'row', 70, editor, term, id+'Split')
+	
+	var btn=[
+		Konekti.btnConfig("remnants","fa-th", '', {'client':id}, "w3-blue-grey", ""),
+		Konekti.btnConfig("primitives","fa-magic", '', {'client':id}, "w3-blue-grey", ""),
+		Konekti.btnConfig("compile","fa-gear", '', {'client':id}, "w3-blue-grey", ""),
+		Konekti.btnConfig("run","fa-play", '', {'client':id}, "w3-blue-grey", ""),
+		Konekti.btnConfig("apply","fa-repeat", '', {'client':id}, "w3-blue-grey", "")
+	]
+	var navbar = Konekti.navbarConfig('funpl-navbar', 'w3-blue-grey', btn, 'client', 'select' ) 
+	render.width = '100%'
+	render.height = '100%'
+	var command = Konekti.aceConfig(id+'Command', '100%', '100%', '', mode, 'eclipse', code)
+	var split2 = Konekti.splitConfig(id+'Split2','100%','rest', 'row', 85, render, command, id+'Two')
+	var two = Konekti.divConfig(id+'Two', '100%', '100%', '', [navbar,split2], id+'Split')
 
-function KonektiMain(){
-	var urlParams = new URLSearchParams(window.location.search)
-	var client = new KMain(urlParams.get('page'))
-
-	function rendered(){
-		var toolbar = Konekti.client('tools')
-		toolbar.add( 
-			{ "plugin":"dropdown", 
-				"id":"lang", "icon":"fa fa-language", "method":"language", 
-				"options":[{"id":"es","caption":"Español"}, 
-				{"id":"en","caption":"English"}]
-			})
-		var lang = urlParams.get('lang')
-		if( lang === undefined || lang === null ) lang = window.navigator.language
-		lang = lang.split('-')[0]
-		if( lang != 'es' && lang != 'en' ) lang = 'en'
-		client.language(lang)
-	}
-
-	Konekti.box('main', "", "width:100%;height:100%",{"plugin":"hcf", 
-		"content":{
-			"plugin":"sidebar",
-			"main":{
-				"plugin":"split",
-				"type":"row",
-				"start":30,
-				"one":{ "plugin":"html", "id":"info", "initial":""},
-				"two":{
-					"plugin":"split", 
-					"type":"col",
-					"start":50, 
-					"one": {
-						"plugin":"split",
-						"type":"row",
-						"start":85,
-						"two":{ "plugin":"html","id":"console", "initial":""},
-						"one": {"plugin":"ace", "id":"coder", "mode":"html"}	
-					},
-					"two":{
-						"plugin":"split",
-						"type":"row",
-						"start":85,
-						"one":{ "plugin":"html","id":"render","initial":"" },
-						"two": {"plugin":"ace", "id":"command", "mode":"html"}	
-					}
-				},
-			},
-			"side":{"id":"toc", "plugin":"html"},
-			"navbar":{
-				"id":"tools",
-				"btn":[
-					{"id":"remnants","icon":"fa fa-th", "onclick":{"method":"remnants"}},
-					{"id":"primitives","icon":"fa fa-magic", "onclick":{"method":"primitives"}},
-					{"id":"compile","icon":"fa fa-gear", "onclick":{"method":"compile"}},
-					{"id":"run","icon":"fa fa-play", "onclick":{"method":"run"}},
-					{"id":"apply","icon":"fa fa-repeat", "onclick":{"method":"apply"}}
-				]
-			}
-		},
-		"header":{"plugin":"header","icon":"fa fa-th-large", "caption":FunIDE.title+" Programming Language", "h":4, "style":"w3-teal w3-center", "id":"title"},
-		"footer":{"plugin":"header","id":"foot", "caption":"Developed by Professor Jonatan Gomez, Ph. D.", "h":6, "style":"w3-teal w3-center"}}, rendered
-	)
+	var split = Konekti.splitConfig(id+'Split','100%','100%', type, 60, one, two, id)
+	return {'plugin':'funpl', 'id':id, 'width':width, 'height' :height, 'parent':parent, 'api':api, 'children':[split]}
 }
 
-Konekti.uses('box','tree')
-
+/**
+ * Creates a FunPL client
+ * @param id GUI's id,
+ * @param width Width of the component
+ * @param height Height of the component
+ * @param type If component will be displayed as a row ('row') or as a column ('col') 
+ * @param mode Programming language mode 
+ * @param code ACE code for syntax highlighting the programming language
+ * @param api Programming language API
+ * @param render Programming language render component
+ */
+ Konekti.funpl = function(id, width, height, type, mode, code, api, render){
+	return Konekti.build(Konekti.funplConfig(id, width, height, type, mode, code, api, render))
+}
