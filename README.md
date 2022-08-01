@@ -9,9 +9,8 @@ Java/Javascript components for defining the FunPL class: Functional with Unifica
 
 &nbsp;Javascript components require:
 
-&nbsp;kompari.js, lifya.js, jxon.js, and Konekti.js
+&nbsp;kompari.js, lifya.js, jxon.js, and konekti.js
 
-&nbsp;Available at <A HREF="https://numtseng.com/modules/">https://numtseng.com/modules/</A> and <A HREF="https://numtseng.com/modules/konekti/">https://numtseng.com/modules/konekti</A>
 
 <h3>Version 1.0</h3>
 <h3>Copyright (c)</h3>
@@ -20,14 +19,10 @@ Java/Javascript components for defining the FunPL class: Functional with Unifica
 
 &nbsp;Java ready to use: <A HREF="https://github.com/jgomezpe/libs/funpl.jar">https://github.com/jgomezpe/libs/funpl.jar</A>
 
-&nbsp;Javascript ready to use: <A HREF="https://numtseng.com/modules/funpl.js">https://numtseng.com/modules/funpl.js</A>, 
- <A HREF="https://numtseng.com/modules/funpl_wrap.js">https://numtseng.com/modules/funpl_wrap.js</A>, and <A HREF="https://numtseng.com/modules/funplIDE.js">https://numtseng.com/modules/funplIDE.js</A>
+&nbsp;Javascript ready to use: <A HREF="https://jgomezpe.github.io/funpl/js/funpl.js">https://jgomezpe.github.io/funpl/js/funpl.js</A>, 
+ <A HREF="https://jgomezpe.github.io/funpl/js/funpl_wrap.js">https://jgomezpe.github.io/funpl/js/funpl_wrap.js</A>, and <A HREF="https://jgomezpe.github.io/funpl/js/funplIDE.js">https://jgomezpe.github.io/funpl/js/funplIDE.js</A>
 
 &nbsp;Java/Javascript source code: <A HREF="https://github.com/jgomezpe/funpl/">https://github.com/jgomezpe/funpl/</A>
-
-&nbsp;Java API documentation: <A HREF="https://numtseng.com/api/funpl/java/">https://numtseng.com/api/funpl/java/</A>
-
-&nbsp;Javascript API documentation: <A HREF="https://numtseng.com/api/funpl/">https://numtseng.com/api/funpl/</A>
 
 &nbsp;All rights reserved.
 
