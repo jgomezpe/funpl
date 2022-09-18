@@ -27,47 +27,67 @@
 * @version 1.0
 */
 
-Konekti.load('split', 'ace', 'navbar')
-
-/** Konekti Plugin for Python */
-class FunPLPlugIn extends PlugIn{
-    /** Creates a Plugin for Python */
-    constructor(){ super('funpl') }
-    
-    /**
-     * Creates a client for the plugin's instance
-     * @param config Python configuration
-     */
-    client(config){ return new FunPLClient(config) }
-}
-
-if( Konekti.funpl===undefined) new FunPLPlugIn()
-
-
 /*
  *
  * A client for a Python server
  */  
-class FunPLClient extends Client{
+class FunPLClient extends Container{
 	/**
-	 * Creates a Python server client
-	 * @param config Configuration includes
-	 * id: GUI's id,
-	 * editor: Editor's id
-	 * url: Python's server url
-	 * run: Run button's id 
-	 * console: Console/Terminal's id
-	 * type If python console will be displayed as a row ('row') or as a column ('col') 
-	 * captionRun Caption for the run button when ready for running python code (to start code running)
-	 * captionStop Caption for the run button when running python code (to stop code running)
+	 * Creates a FunPL client object
+	 * @param id GUI's id,
+	 * @param width Width of the component
+	 * @param height Height of the component
+	 * @param type If component will be displayed as a row ('row') or as a column ('col') 
+	 * @param mode Programming language mode 
+	 * @param code ACE code for syntax highlighting the programming language
+	 * @param api Programming language API
+	 * @param render Programming language render component
+	 * @param parent Parent component 
 	 */
-	constructor(config){
-		super(config)
+	setup(id, width, height, type, mode, code, api, render, parent='KonektiMain'){
+		var editor = {'plugin':'ace', 'setup':[id+'Coder', '100%', '100%', '', mode, 'eclipse', code]}
+		var term ={'plugin':'div', 'setup':[id+'Console', '100%', '100%', '', '', id+'One']}
+		var one = {'plugin':'split', 'setup':[id+'One', '100%', '100%', 'row', 70, editor, term, id+'Split']}
+		
+		var btn=[
+			{'plugin':'btn', 'setup':["remnants","fa-th", '', {'client':id}, "w3-blue-grey", ""]},
+			{'plugin':'btn', 'setup':["primitives","fa-magic", '', {'client':id}, "w3-blue-grey", ""]},
+			{'plugin':'btn', 'setup':["compile","fa-gear", '', {'client':id}, "w3-blue-grey", ""]},
+			{'plugin':'btn', 'setup':["run","fa-play", '', {'client':id}, "w3-blue-grey", ""]},
+			{'plugin':'btn', 'setup':["apply","fa-repeat", '', {'client':id}, "w3-blue-grey", ""]}
+		]
+		var navbar = {'plugin':'navbar', 'setup':['funpl-navbar', 'w3-blue-grey', btn, 'client', 'select']} 
+		var command = {'plugin':'ace', 'setup':[id+'Command', '100%', '100%', '', mode, 'eclipse', code]}
+		var split2 = {'plugin':'split', 'setup':[id+'Split2','100%','rest', 'row', 85, render, command, id+'Two']}
+		var two = {'plugin':'container', 'setup':[id+'Two', '100%', '100%', '', [navbar,split2], id+'Split']}
+
+		var split = {'plugin':'split', 'setup':[id+'Split','100%','100%', type, 60, one, two, id]}
+		return {'plugin':'funpl', 'id':id, 'width':width, 'height' :height, 'parent':parent, 'api':api, 'children':[split]}
+	}
+
+	/**
+	 * Creates a FunPL client object
+	 * @param id GUI's id,
+	 * @param width Width of the component
+	 * @param height Height of the component
+	 * @param type If component will be displayed as a row ('row') or as a column ('col') 
+	 * @param mode Programming language mode 
+	 * @param code ACE code for syntax highlighting the programming language
+	 * @param api Programming language API
+	 * @param render Programming language render component
+	 * @param parent Parent component 
+	 */
+	 constructor(id, width, height, type, mode, code, api, render, parent='KonektiMain'){
+		super(...arguments)
+	}
+
+	setChildrenBack(){
+		super.setChildrenBack()
 		var x = this
-		x.api = config.api
+		x.api = this.config.api
 		x.app = new Application( x.id, Konekti.client[x.id+'Coder'],  Konekti.client[x.id+'Command'], x, x, x.api, 
 			function(msg){ return Konekti.dom.fromTemplate(msg,x.msg) } 
-		)	
+		)
 	}
 
 	console(){ return Konekti.client[this.id+'Console'] }
@@ -89,41 +109,6 @@ class FunPLClient extends Client{
 }
 
 /**
- * Creates a FunPL client object
- * @param id GUI's id,
- * @param width Width of the component
- * @param height Height of the component
- * @param type If component will be displayed as a row ('row') or as a column ('col') 
- * @param mode Programming language mode 
- * @param code ACE code for syntax highlighting the programming language
- * @param api Programming language API
- * @param render Programming language render component
- * @param parent Parent component 
- */
-Konekti.funplConfig = function(id, width, height, type, mode, code, api, render, parent='KonektiMain'){
-	var editor = Konekti.aceConfig(id+'Coder', '100%', '100%', '', mode, 'eclipse', code)
-	var term = Konekti.divConfig(id+'Console', '100%', '100%', '', '', id+'One')
-	var one = Konekti.splitConfig(id+'One', '100%', '100%', 'row', 70, editor, term, id+'Split')
-	
-	var btn=[
-		Konekti.btnConfig("remnants","fa-th", '', {'client':id}, "w3-blue-grey", ""),
-		Konekti.btnConfig("primitives","fa-magic", '', {'client':id}, "w3-blue-grey", ""),
-		Konekti.btnConfig("compile","fa-gear", '', {'client':id}, "w3-blue-grey", ""),
-		Konekti.btnConfig("run","fa-play", '', {'client':id}, "w3-blue-grey", ""),
-		Konekti.btnConfig("apply","fa-repeat", '', {'client':id}, "w3-blue-grey", "")
-	]
-	var navbar = Konekti.navbarConfig('funpl-navbar', 'w3-blue-grey', btn, 'client', 'select' ) 
-	render.width = '100%'
-	render.height = '100%'
-	var command = Konekti.aceConfig(id+'Command', '100%', '100%', '', mode, 'eclipse', code)
-	var split2 = Konekti.splitConfig(id+'Split2','100%','rest', 'row', 85, render, command, id+'Two')
-	var two = Konekti.divConfig(id+'Two', '100%', '100%', '', [navbar,split2], id+'Split')
-
-	var split = Konekti.splitConfig(id+'Split','100%','100%', type, 60, one, two, id)
-	return {'plugin':'funpl', 'id':id, 'width':width, 'height' :height, 'parent':parent, 'api':api, 'children':[split]}
-}
-
-/**
  * Creates a FunPL client
  * @param id GUI's id,
  * @param width Width of the component
@@ -135,5 +120,5 @@ Konekti.funplConfig = function(id, width, height, type, mode, code, api, render,
  * @param render Programming language render component
  */
  Konekti.funpl = function(id, width, height, type, mode, code, api, render){
-	return Konekti.build(Konekti.funplConfig(id, width, height, type, mode, code, api, render))
+	return new FunPLClient(id, width, height, type, mode, code, api, render)
 }
