@@ -31,9 +31,12 @@
  *
  * A client for a Python server
  */  
-class FunPLClient extends Container{
+class FunPLPlugin extends PlugIn{
+	constructor(){ super('funpl') }
+
 	/**
 	 * Creates a FunPL client object
+	 * @param parent Parent component 
 	 * @param id GUI's id,
 	 * @param width Width of the component
 	 * @param height Height of the component
@@ -42,49 +45,48 @@ class FunPLClient extends Container{
 	 * @param code ACE code for syntax highlighting the programming language
 	 * @param api Programming language API
 	 * @param render Programming language render component
-	 * @param parent Parent component 
+	 * @param config Component configuration
 	 */
-	setup(id, width, height, type, mode, code, api, render, parent='KonektiMain'){
-		var editor = {'plugin':'ace', 'setup':[id+'Coder', '100%', '100%', '', mode, 'eclipse', code]}
-		var term ={'plugin':'div', 'setup':[id+'Console', '100%', '100%', '', '', id+'One']}
-		var one = {'plugin':'split', 'setup':[id+'One', '100%', '100%', 'row', 70, editor, term, id+'Split']}
+	setup(parent, id, type, mode, code, api, render, config={}){
+		var editor = {'plugin':'ace', 'setup':[id+'Coder', '', mode, 'eclipse', code, {'style':'width:100%;height:100%;'}]}
+		var term ={'plugin':'latex', 'setup':[id+'Console', '', {'style':'width:100%;height:100%;'}]}
+		var one = {'plugin':'split', 'setup':[id+'One', 'row', 70, editor, term, {'style':'width:100%;height:100%;'}]}
 		
 		var btn=[
-			{'plugin':'btn', 'setup':["remnants","fa-th", '', {'client':id}, "w3-blue-grey", ""]},
-			{'plugin':'btn', 'setup':["primitives","fa-magic", '', {'client':id}, "w3-blue-grey", ""]},
-			{'plugin':'btn', 'setup':["compile","fa-gear", '', {'client':id}, "w3-blue-grey", ""]},
-			{'plugin':'btn', 'setup':["run","fa-play", '', {'client':id}, "w3-blue-grey", ""]},
-			{'plugin':'btn', 'setup':["apply","fa-repeat", '', {'client':id}, "w3-blue-grey", ""]}
+			{'plugin':'btn', 'setup':["remnants","fa-th", '', {'client':id}]},
+			{'plugin':'btn', 'setup':["primitives","fa-magic", '', {'client':id}]},
+			{'plugin':'btn', 'setup':["compile","fa-gear", '', {'client':id}]},
+			{'plugin':'btn', 'setup':["run","fa-play", '', {'client':id}]},
+			{'plugin':'btn', 'setup':["apply","fa-repeat", '', {'client':id}]}
 		]
-		var navbar = {'plugin':'navbar', 'setup':['funpl-navbar', 'w3-blue-grey', btn, 'client', 'select']} 
-		var command = {'plugin':'ace', 'setup':[id+'Command', '100%', '100%', '', mode, 'eclipse', code]}
-		var split2 = {'plugin':'split', 'setup':[id+'Split2','100%','rest', 'row', 85, render, command, id+'Two']}
-		var two = {'plugin':'container', 'setup':[id+'Two', '100%', '100%', '', [navbar,split2], id+'Split']}
+		var navbar = {'plugin':'navbar', 'setup':['funpl-navbar', btn, '', {'class':'w3-blue-grey'}]} 
+		var command = {'plugin':'ace', 'setup':[id+'Command', '', mode, 'eclipse', code, {'style':'width:100%;height:100%;'}]}
+		var split2 = {'plugin':'split', 'setup':[id+'Split2', 'row', 85, render, command, {'style':'width:100%;height:93%;'}]}
+		var two = {'plugin':'raw', 'setup':[id+'Two', [navbar,split2], {'style':'width:100%;height:100%;'}]}
 
-		var split = {'plugin':'split', 'setup':[id+'Split','100%','100%', type, 60, one, two, id]}
-		return {'plugin':'funpl', 'id':id, 'width':width, 'height' :height, 'parent':parent, 'api':api, 'children':[split]}
+		var split = {'plugin':'split', 'setup':[id+'Split', type, 60, one, two, {'style':'width:100%;height:100%;'}]}
+		var c = super.setup(parent, id, split, config)
+		c.api = api
+		return c
 	}
 
+	client(config){ return new FunPLClient(config) }
+}
+
+new FunPLPlugin()
+
+/*
+ *
+ * A client for a Python server
+ */  
+class FunPLClient extends Client{
 	/**
 	 * Creates a FunPL client object
-	 * @param id GUI's id,
-	 * @param width Width of the component
-	 * @param height Height of the component
-	 * @param type If component will be displayed as a row ('row') or as a column ('col') 
-	 * @param mode Programming language mode 
-	 * @param code ACE code for syntax highlighting the programming language
-	 * @param api Programming language API
-	 * @param render Programming language render component
-	 * @param parent Parent component 
+	 * @param config Component configuration
 	 */
-	 constructor(id, width, height, type, mode, code, api, render, parent='KonektiMain'){
-		super(...arguments)
-	}
-
-	setChildrenBack(){
-		super.setChildrenBack()
+	constructor(config){
+		super(config)
 		var x = this
-		x.api = this.config.api
 		x.app = new Application( x.id, Konekti.client[x.id+'Coder'],  Konekti.client[x.id+'Command'], x, x, x.api, 
 			function(msg){ return Konekti.dom.fromTemplate(msg,x.msg) } 
 		)
@@ -118,7 +120,13 @@ class FunPLClient extends Container{
  * @param code ACE code for syntax highlighting the programming language
  * @param api Programming language API
  * @param render Programming language render component
+ * @param config Configuration of the funpl component
+ * @param callback Function called when the funpl component is ready
  */
- Konekti.funpl = function(id, width, height, type, mode, code, api, render){
-	return new FunPLClient(id, width, height, type, mode, code, api, render)
+ Konekti.funpl = function(parent, id, type, mode, code, api, render, config, callback){
+	var args = []
+	for(var i=0; i<arguments.length; i++) args[i] = arguments[i]
+	if(args.length==7) args[7] = {}
+	if(args.length==8) args[8] = function(){}
+	Konekti.add('funpl', ...args)
 }
