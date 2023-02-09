@@ -61,10 +61,10 @@ class FunPLPlugin extends PlugIn{
 		]
 		var navbar = {'plugin':'navbar', 'setup':['funpl-navbar', btn, '', {'class':'w3-blue-grey'}]} 
 		var command = {'plugin':'ace', 'setup':[id+'Command', '', mode, 'eclipse', code, {'style':'width:100%;height:100%;'}]}
-		var split2 = {'plugin':'split', 'setup':[id+'Split2', 'row', 85, render, command, {'style':'width:100%;height:93%;'}]}
+		var split2 = {'plugin':'split', 'setup':[id+'Split2', 'row', 85, render, command, {'style':'width:100%;height:fit;'}]}
 		var two = {'plugin':'raw', 'setup':[id+'Two', [navbar,split2], {'style':'width:100%;height:100%;'}]}
 
-		var split = {'plugin':'split', 'setup':[id+'Split', type, 60, one, two, {'style':'width:100%;height:100%;'}]}
+		var split = {'plugin':'split', 'setup':[id+'Split', type, 50, one, two, {'style':'width:100%;height:100%;'}]}
 		var c = super.setup(parent, id, split, config)
 		c.api = api
 		return c
